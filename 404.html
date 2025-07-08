@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Google Consent Mode -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            // Výchozí stav: souhlas odepřen, pokud není uložena volba
+            if (!localStorage.getItem("cookies-accepted")) {
+                gtag("consent", "default", {
+                    analytics_storage: "denied",
+                });
+            } else {
+                gtag("consent", "update", {
+                    analytics_storage:
+                        localStorage.getItem("cookies-accepted") === "granted"
+                            ? "granted"
+                            : "denied",
+                });
+            }
+        </script>
+        <!-- Google Analytics (nenačte se automaticky) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SGG2CLM06D"
+        ></script>
+        <script>
+            function loadGoogleAnalytics() {
+                gtag("js", new Date());
+                gtag("config", "G-SGG2CLM06D");
+            }
+
+            // Funkce pro zobrazení/skrytí cookie banneru
+            function showCookieBanner() {
+                if (!localStorage.getItem("cookies-accepted")) {
+                    document.getElementById("cookie-banner").style.display =
+                        "flex";
+                } else {
+                    document.getElementById("cookie-banner").style.display =
+                        "none";
+                    if (
+                        localStorage.getItem("cookies-accepted") === "granted"
+                    ) {
+                        loadGoogleAnalytics();
+                    }
+                }
+            }
+
+            // Funkce pro přijetí cookies
+            function acceptCookies() {
+                localStorage.setItem("cookies-accepted", "granted");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "granted",
+                });
+                loadGoogleAnalytics();
+            }
+
+            // Funkce pro odmítnutí cookies
+            function declineCookies() {
+                localStorage.setItem("cookies-accepted", "denied");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "denied",
+                });
+            }
+
+            // Zobrazit cookie banner po načtení stránky
+            window.addEventListener("DOMContentLoaded", showCookieBanner);
+        </script>
+        <!-- SEO meta tagy pro Google -->
+        <meta
+            name="description"
+            content="SentrySMP is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="keywords"
+            content="Minecraft, SMP, English, Czech, server, safe, enjoyable, experience, players, vip, premium, exclusive"
+        />
+        <meta name="author" content="Sentry SMP" />
+
+        <!-- Open Graph pro Facebook, Discord, aj. -->
+        <meta property="og:title" content="Sentry SMP" />
+        <meta
+            property="og:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            property="og:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <meta property="og:url" content="https://sentrysmp.eu/" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Cards (volitelné) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sentry SMP" />
+        <meta
+            name="twitter:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="twitter:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <!-- Language settings -->
+        <meta http-equiv="content-language" content="en" />
+        <meta name="language" content="English" />
+
+        <title>Page Not FoundSentry SMP</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="images/favicon.png" />
+        <style>
+            header {
+                background-image: url(images/background-image.png);
+                background-size: cover;
+                background-position: center;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- udělat hovery na grid-itemy -->
+        <div class="container">
+            <div class="main-wrapper">
+                <h1 class="main">Page Not Found</h1>
+            </div>
+
+            <div class="collapse-wrapper">
+                <h3
+                    class="collapse-header"
+                    onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"
+                >
+                    What is 404?<span class="collapse-toggle"
+                        ><i class="bi bi-arrow-down"></i
+                    ></span>
+                </h3>
+                <div class="collapse-content">
+                    <span>
+                        A "<b>404</b>" is an <b>HTTP status code</b> that
+                        indicates a webpage could not be found on the server. It
+                        typically occurs when a user tries to visit a
+                        <b>URL</b> that doesn't exist or has been moved. The
+                        server returns a <b>404 error</b> when it cannot locate
+                        the requested page, often accompanied by a message like
+                        "<b>404 Not Found</b>" or a custom error page indicating
+                        that the page is missing. This is a common error seen on
+                        websites.
+                    </span>
+                </div>
+            </div>
+            <p>
+                Lost in the zone! Looks like one of the players just used /kill
+                on our database. Don’t worry, the admins are already on it, but
+                while we fix things, why not head out on an adventure with the
+                other players? Hang in there and come back on the hub!
+            </p>
+            <p>
+                Please use <a href="index.html">/hub</a> to return to the hub.
+            </p>
+            <p>
+                Or use <a href="javascript:history.back()">/back</a> to return
+                on your previous page.
+            </p>
+            <p><i>Your team of:</i></p>
+            <img src="images/logo.png" class="responsive-image" alt="logo" />
+        </div>
+        <script src="js/script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Google Consent Mode -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            // Výchozí stav: souhlas odepřen, pokud není uložena volba
+            if (!localStorage.getItem("cookies-accepted")) {
+                gtag("consent", "default", {
+                    analytics_storage: "denied",
+                });
+            } else {
+                gtag("consent", "update", {
+                    analytics_storage:
+                        localStorage.getItem("cookies-accepted") === "granted"
+                            ? "granted"
+                            : "denied",
+                });
+            }
+        </script>
+        <!-- Google Analytics (nenačte se automaticky) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SGG2CLM06D"
+        ></script>
+        <script>
+            function loadGoogleAnalytics() {
+                gtag("js", new Date());
+                gtag("config", "G-SGG2CLM06D");
+            }
+
+            // Funkce pro zobrazení/skrytí cookie banneru
+            function showCookieBanner() {
+                if (!localStorage.getItem("cookies-accepted")) {
+                    document.getElementById("cookie-banner").style.display =
+                        "flex";
+                } else {
+                    document.getElementById("cookie-banner").style.display =
+                        "none";
+                    if (
+                        localStorage.getItem("cookies-accepted") === "granted"
+                    ) {
+                        loadGoogleAnalytics();
+                    }
+                }
+            }
+
+            // Funkce pro přijetí cookies
+            function acceptCookies() {
+                localStorage.setItem("cookies-accepted", "granted");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "granted",
+                });
+                loadGoogleAnalytics();
+            }
+
+            // Funkce pro odmítnutí cookies
+            function declineCookies() {
+                localStorage.setItem("cookies-accepted", "denied");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "denied",
+                });
+            }
+
+            // Zobrazit cookie banner po načtení stránky
+            window.addEventListener("DOMContentLoaded", showCookieBanner);
+        </script>
+        <!-- SEO meta tagy pro Google -->
+        <meta
+            name="description"
+            content="SentrySMP is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="keywords"
+            content="Minecraft, SMP, English, Czech, server, safe, enjoyable, experience, players, vip, premium, exclusive"
+        />
+        <meta name="author" content="Sentry SMP" />
+
+        <!-- Open Graph pro Facebook, Discord, aj. -->
+        <meta property="og:title" content="Sentry SMP" />
+        <meta
+            property="og:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            property="og:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <meta property="og:url" content="https://sentrysmp.eu/" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Cards (volitelné) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sentry SMP" />
+        <meta
+            name="twitter:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="twitter:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <!-- Language settings -->
+        <meta http-equiv="content-language" content="en" />
+        <meta name="language" content="English" />
+
+        <title>How Can I Join? - Sentry SMP</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="images/favicon.png" />
+        <style>
+            body.dark .header-background {
+                background-image: url("images/background-image-dark.png");
+            }
+
+            body:not(.dark) .header-background {
+                background-image: url("images/background-image.png");
+            }
+            .container img {
+                width: 348px;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar" id="navbar-main"></nav>
+
+        <!-- udělat hovery na grid-itemy -->
+        <header id="header-main"></header>
+        <div class="container">
+            <div class="main-wrapper">
+                <h2 class="main">How Can I Join?</h2>
+            </div>
+            <h2>Java</h2>
+            <p>
+                Server IP: <b>mc.sentrysmp.eu</b><br />
+                Version: <b>1.21.4+</b>
+            </p>
+            <h3>1. Go to Multiplayer section</h3>
+            <img src="images/title-screen.png" alt="title screen" />
+            <h3>2. Add a server</h3>
+            <img src="images/multiplayer.png" alt="multiplayer screen" />
+            <h3>3. Enter the details</h3>
+            <img src="images/ip.png" alt="IP in Minecraft Java" />
+            <h3>4. Join the server</h3>
+            <img src="images/join.png" alt="Join the server" />
+            <h3>5. Register/login</h3>
+            <img src="images/login.png" alt="Login/register" />
+            <h3>6. Enjoy playing!</h3>
+            <img src="images/play.png" alt="Enjoy!" />
+            <p>
+                We <b>recommend</b> playing on <b>vanilla Minecraft</b>. Please
+                <b>do not use cheats</b>—we have a strong anti-cheat system and
+                a fast admin team to detect hacks.
+            </p>
+            <h2>Bedrock</h2>
+            <p>
+                Server IP: <b>pe.sentrysmp.eu</b><br />
+                Version: <b>newest</b> <br />
+                Port: <b>25565</b>
+            </p>
+            <h3>1. Go to Play section</h3>
+            <img src="images/title-bed.png" alt="Go to Play section" />
+            <h3>2. Go to servers tab</h3>
+            <img src="images/play-bed.png" alt="Go tov servers tab" />
+            <h3>3. Add a new server</h3>
+            <img src="images/servers-bed.png" alt="Add a new server" />
+            <h3>4. Enter the details, add and join</h3>
+            <img
+                src="images/details-bed.png"
+                alt="Enter the details, add and join"
+            />
+            <h3>5. Proceed with playing</h3>
+            <img src="images/procced-bed.png" alt="Proceed with playing" />
+            <h3>6. Accept our resource packs</h3>
+            <img src="images/resource-bed.png" alt="Accept our resources" />
+            <h3>7. Register/login</h3>
+            <img src="images/login-bed.png" alt="Login/register" />
+            <h3>8. Enjoy playing!</h3>
+            <img src="images/enjoy-bed.png" alt="Enjoy!" />
+            <p>
+                Please <b>do not use cheats</b>—we have a strong anti-cheat
+                system and a fast admin team to detect hacks.
+            </p>
+        </div>
+        <footer id="footer-main"></footer>
+        <script src="js/script.js"></script>
+    </body>
+</html>

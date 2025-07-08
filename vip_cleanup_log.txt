@@ -1,0 +1,6 @@
+2025-07-05 18:14:11 - Removed VIP user: Axas_MC - RCON: Success
+2025-07-05 18:14:11 - Removed VIP user: Taneq - RCON: Success
+2025-07-05 18:14:11 - Summary: Removed 2 expired VIP users
+2025-07-05 18:14:22 - Removed VIP user: Axas_MC - RCON: Success
+2025-07-05 18:14:22 - Removed VIP user: Taneq - RCON: Success
+2025-07-05 18:14:22 - Summary: Removed 2 expired VIP users

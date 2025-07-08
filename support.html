@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Google Consent Mode -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            // Výchozí stav: souhlas odepřen, pokud není uložena volba
+            if (!localStorage.getItem("cookies-accepted")) {
+                gtag("consent", "default", {
+                    analytics_storage: "denied",
+                });
+            } else {
+                gtag("consent", "update", {
+                    analytics_storage:
+                        localStorage.getItem("cookies-accepted") === "granted"
+                            ? "granted"
+                            : "denied",
+                });
+            }
+        </script>
+        <!-- Google Analytics (nenačte se automaticky) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SGG2CLM06D"
+        ></script>
+        <script>
+            function loadGoogleAnalytics() {
+                gtag("js", new Date());
+                gtag("config", "G-SGG2CLM06D");
+            }
+
+            // Funkce pro zobrazení/skrytí cookie banneru
+            function showCookieBanner() {
+                if (!localStorage.getItem("cookies-accepted")) {
+                    document.getElementById("cookie-banner").style.display =
+                        "flex";
+                } else {
+                    document.getElementById("cookie-banner").style.display =
+                        "none";
+                    if (
+                        localStorage.getItem("cookies-accepted") === "granted"
+                    ) {
+                        loadGoogleAnalytics();
+                    }
+                }
+            }
+
+            // Funkce pro přijetí cookies
+            function acceptCookies() {
+                localStorage.setItem("cookies-accepted", "granted");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "granted",
+                });
+                loadGoogleAnalytics();
+            }
+
+            // Funkce pro odmítnutí cookies
+            function declineCookies() {
+                localStorage.setItem("cookies-accepted", "denied");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "denied",
+                });
+            }
+
+            // Zobrazit cookie banner po načtení stránky
+            window.addEventListener("DOMContentLoaded", showCookieBanner);
+        </script>
+        <!-- SEO meta tagy pro Google -->
+        <meta
+            name="description"
+            content="SentrySMP is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="keywords"
+            content="Minecraft, SMP, English, Czech, server, safe, enjoyable, experience, players, vip, premium, exclusive"
+        />
+        <meta name="author" content="Sentry SMP" />
+
+        <!-- Open Graph pro Facebook, Discord, aj. -->
+        <meta property="og:title" content="Sentry SMP" />
+        <meta
+            property="og:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            property="og:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <meta property="og:url" content="https://sentrysmp.eu/" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Cards (volitelné) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sentry SMP" />
+        <meta
+            name="twitter:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="twitter:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <!-- Language settings -->
+        <meta http-equiv="content-language" content="en" />
+        <meta name="language" content="English" />
+
+        <title>Support - Sentry SMP</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="images/favicon.png" />
+        <style>
+            body.dark .header-background {
+                background-image: url("images/background-image-dark.png");
+            }
+
+            body:not(.dark) .header-background {
+                background-image: url("images/background-image.png");
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar" id="navbar-main"></nav>
+
+        <!-- udělat hovery na grid-itemy -->
+        <header id="header-main"></header>
+        <div class="container">
+            <div class="main-wrapper">
+                <h1 class="main">Support</h1>
+            </div>
+            <h2>Discord Support</h2>
+            <p>
+                The <b>best way</b> to reach our team is through <b>Discord</b>,
+                where our dedicated staff members are ready to assist you with
+                any questions, issues, or concerns you might have. Your support
+                is only heard via <b>#ticket-create</b> channel.
+                <a href="https://discord.gg/NptZrc5y6Q" target="_blank"
+                    >Join our community</a
+                >
+                and get the help you need!
+            </p>
+            <button
+                onclick="window.open('https://discord.com/channels/1159130895190605854/1262894355396427796/1262910466263482368', '_blank')"
+            >
+                <i class="bi bi-envelope-arrow-down"></i> Create ticket
+            </button>
+            <p><i>*only for members</i></p>
+            <h2>Email Support</h2>
+            <p>
+                If you <b>prefer to communicate via email</b>, you can reach us
+                at
+                <a href="mailto:support@sentrysmp.eu">support@sentrysmp.eu</a>.
+                Please include a detailed description of your issue and any
+                relevant information that could help us assist you more
+                effectively.
+            </p>
+        </div>
+        <footer id="footer-main"></footer>
+        <script src="js/script.js"></script>
+    </body>
+</html>

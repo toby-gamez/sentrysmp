@@ -1,0 +1,37 @@
+RewriteEngine On
+
+# Výjimky: Nepřepisovat add_announcement.php, delete_announcement.php, login-player.php, login-players.php
+RewriteRule ^add_announcement\.php$ - [L]
+RewriteRule ^delete_announcement\.php$ - [L]
+RewriteRule ^login-player\.php$ - [L]
+RewriteRule ^create-checkout-session\.php$ - [L]
+
+
+# Kořenová URL na index.php
+RewriteRule ^$ /index.php [L]
+
+# Přepis /něco na /něco.html pokud .html existuje a není soubor ani složka
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# Přepis /něco na /něco.php pokud .html neexistuje a .php existuje
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Přesměrování /něco.html na /něco (trvalé)
+RewriteCond %{THE_REQUEST} \s/([^\s]+)\.html [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)\.html$ /$1 [R=301,L]
+
+# Přesměrování /něco.php na /něco (trvalé)
+RewriteCond %{THE_REQUEST} \s/([^\s]+)\.php [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)\.php$ /$1 [R=301,L]
+
+# Nastavení vlastní 404 stránky
+ErrorDocument 404 /404.html

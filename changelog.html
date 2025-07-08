@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Google Consent Mode -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            // Výchozí stav: souhlas odepřen, pokud není uložena volba
+            if (!localStorage.getItem("cookies-accepted")) {
+                gtag("consent", "default", {
+                    analytics_storage: "denied",
+                });
+            } else {
+                gtag("consent", "update", {
+                    analytics_storage:
+                        localStorage.getItem("cookies-accepted") === "granted"
+                            ? "granted"
+                            : "denied",
+                });
+            }
+        </script>
+        <!-- Google Analytics (nenačte se automaticky) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SGG2CLM06D"
+        ></script>
+        <script>
+            function loadGoogleAnalytics() {
+                gtag("js", new Date());
+                gtag("config", "G-SGG2CLM06D");
+            }
+
+            // Funkce pro zobrazení/skrytí cookie banneru
+            function showCookieBanner() {
+                if (!localStorage.getItem("cookies-accepted")) {
+                    document.getElementById("cookie-banner").style.display =
+                        "flex";
+                } else {
+                    document.getElementById("cookie-banner").style.display =
+                        "none";
+                    if (
+                        localStorage.getItem("cookies-accepted") === "granted"
+                    ) {
+                        loadGoogleAnalytics();
+                    }
+                }
+            }
+
+            // Funkce pro přijetí cookies
+            function acceptCookies() {
+                localStorage.setItem("cookies-accepted", "granted");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "granted",
+                });
+                loadGoogleAnalytics();
+            }
+
+            // Funkce pro odmítnutí cookies
+            function declineCookies() {
+                localStorage.setItem("cookies-accepted", "denied");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "denied",
+                });
+            }
+
+            // Zobrazit cookie banner po načtení stránky
+            window.addEventListener("DOMContentLoaded", showCookieBanner);
+        </script>
+        <!-- SEO meta tagy pro Google -->
+        <meta
+            name="description"
+            content="SentrySMP is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="keywords"
+            content="Minecraft, SMP, English, Czech, server, safe, enjoyable, experience, players, vip, premium, exclusive"
+        />
+        <meta name="author" content="Sentry SMP" />
+
+        <!-- Open Graph pro Facebook, Discord, aj. -->
+        <meta property="og:title" content="Sentry SMP" />
+        <meta
+            property="og:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            property="og:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <meta property="og:url" content="https://sentrysmp.eu/" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Cards (volitelné) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sentry SMP" />
+        <meta
+            name="twitter:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="twitter:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <!-- Language settings -->
+        <meta http-equiv="content-language" content="en" />
+        <meta name="language" content="English" />
+
+        <title>Web Changelog - Sentry SMP</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="images/favicon.png" />
+        <style>
+            body.dark .header-background {
+                background-image: url("images/background-image-dark.png");
+            }
+
+            body:not(.dark) .header-background {
+                background-image: url("images/background-image.png");
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar" id="navbar-main"></nav>
+
+        <!-- udělat hovery na grid-itemy -->
+        <header id="header-main"></header>
+        <div class="container">
+            <div class="main-wrapper">
+                <h1 class="main">Web Changelog</h1>
+            </div>
+            <p>
+                I you want to contribute, submit an issue or check our code,
+                here you are:
+                <a
+                    target="_blank"
+                    href="https://github.com/toby-gamez/sentrysmp"
+                    >Github</a
+                >
+            </p>
+            <h2>2.3</h2>
+            <ul>
+                <li>
+                    added documentation in <a href="README.md">README.md</a>
+                </li>
+                <li>
+                    fixed security problems with our API keys, RCON, Stripe and
+                    Paypal credentials
+                </li>
+                <li>
+                    this project is now on
+                    <a
+                        target="_blank"
+                        href="https://github.com/toby-gamez/sentrysmp"
+                        >Github</a
+                    >
+                </li>
+            </ul>
+            <h2>2.2</h2>
+            <ul>
+                <li>changed Privacy Policy</li>
+                <li>fixed prices in cart</li>
+                <li>changed Terms of Use</li>
+                <li>added ranks</li>
+                <li>added total price next to Cart button in login pannel</li>
+                <li>changed currency order (now symbol and then price)</li>
+                <li>
+                    fixed stacking commands and removing databases when paying
+                </li>
+                <li>
+                    fixed system for already running commands so that the system
+                    does not use them as pending
+                </li>
+                <li>reparated Minecraft Server Rules and Server Rules</li>
+                <li>all link to Home page now use "/" not "index.php"</li>
+                <li>slightly changed red color, now more pink</li>
+            </ul>
+            <h2>2.1</h2>
+            <ul>
+                <li>
+                    fixed a critical mistake when purchasing items (previous
+                    payment commands were also included)
+                </li>
+                <li>fixed dark mode</li>
+                <li>added support for rewriting Our Team page in admin</li>
+                <li>fixed logining in for cracked players</li>
+                <li>fixed text aragnement</li>
+                <li>added button hierarchy</li>
+                <li>changed font Poppins to Outfit</li>
+                <li>centered logo in navigation</li>
+                <li>added notifications</li>
+                <li>added quantity for each item</li>
+                <li>removed text where it was for support purposes only</li>
+                <li>overall improvements</li>
+            </ul>
+            <h2>2.0.1</h2>
+            <ul>
+                <li>fixed price counting in Paypal checkouts</li>
+            </ul>
+            <h2>2.0</h2>
+            <ul>
+                <li>
+                    resolved issues connecting admin login with Minecraft login
+                </li>
+                <li>added Minecraft connection</li>
+                <li>updated Our Team members</li>
+                <li>implemented new payment systems</li>
+                <li>fixed numerous bugs</li>
+                <li>enhanced security features</li>
+                <li>added listings for paid and VIP users</li>
+                <li>rebuilt how keys and spawners function</li>
+                <li>configured server and integrated website connection</li>
+                <li>updated and optimized databases</li>
+                <li>added join manual</li>
+                <li>reordered index's items</li>
+                <li>edited footer</li>
+            </ul>
+            <h2>1.3</h2>
+            <ul>
+                <li>
+                    resolved multiple issues with .htaccess/web.config and
+                    improved URL shortening (e.g., index.html → index)
+                </li>
+                <li>resolved infinite redirect loops</li>
+                <li>enhanced overall user experience</li>
+            </ul>
+            <h2>1.2</h2>
+            <ul>
+                <li>changed a little Privacy Policy</li>
+                <li>added light mode and switch</li>
+                <li>fixed many issues with styles</li>
+                <li>added 2 background images (for theme), not static</li>
+            </ul>
+            <h2>1.1.3</h2>
+            <ul>
+                <li>added login system</li>
+                <li>edited some styles for buttons</li>
+                <li>removed banner</li>
+                <li>edited navbar</li>
+                <li>fixed <code>z-index</code> errors</li>
+                <li>edited Our Team</li>
+            </ul>
+            <h2>1.1.2</h2>
+            <ul>
+                <li>added keys and admin keys editatons</li>
+                <li>edited Our Team</li>
+                <li>added banner for Tiktok and Vote</li>
+                <li>
+                    removed file extensions (.html, .php, and more) from the end
+                    of displayed files
+                </li>
+                <li>added 404 page</li>
+                <li>redirecting from http to https</li>
+                <li>fixed issues with removing file extensions</li>
+            </ul>
+            <h2>1.1.1</h2>
+            <ul>
+                <li>better word formulations</li>
+                <li>general improvements</li>
+                <li>added Terms of Use</li>
+                <li>fixed some text errors</li>
+            </ul>
+            <h2>1.1</h2>
+            <ul>
+                <li>added analytics and better support for Google search</li>
+                <li>updated Our Team page</li>
+                <li>updated navigation</li>
+                <li>added <a href="privacy-policy.html">Privacy Policy</a></li>
+                <li>added cookie banner</li>
+                <li>
+                    fixed numbers in Discord and Java server members in header
+                </li>
+            </ul>
+            <h2>1.0</h2>
+            <ul>
+                <li>Complete page layout created</li>
+                <li>Basic CSS styles implemented</li>
+                <li>Navigation bar added</li>
+                <li>Footer created</li>
+                <li>Header with background image added</li>
+                <li>Changelog section added</li>
+                <li>Mobile responsiveness implemented</li>
+                <li>Admin panel and database support added</li>
+                <li>Cart and server information sections created</li>
+                <li>Favicon icon added</li>
+            </ul>
+        </div>
+        <footer id="footer-main"></footer>
+        <script src="js/script.js"></script>
+    </body>
+</html>

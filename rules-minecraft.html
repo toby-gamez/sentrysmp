@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Google Consent Mode -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            // Výchozí stav: souhlas odepřen, pokud není uložena volba
+            if (!localStorage.getItem("cookies-accepted")) {
+                gtag("consent", "default", {
+                    analytics_storage: "denied",
+                });
+            } else {
+                gtag("consent", "update", {
+                    analytics_storage:
+                        localStorage.getItem("cookies-accepted") === "granted"
+                            ? "granted"
+                            : "denied",
+                });
+            }
+        </script>
+        <!-- Google Analytics (nenačte se automaticky) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SGG2CLM06D"
+        ></script>
+        <script>
+            function loadGoogleAnalytics() {
+                gtag("js", new Date());
+                gtag("config", "G-SGG2CLM06D");
+            }
+
+            // Funkce pro zobrazení/skrytí cookie banneru
+            function showCookieBanner() {
+                if (!localStorage.getItem("cookies-accepted")) {
+                    document.getElementById("cookie-banner").style.display =
+                        "flex";
+                } else {
+                    document.getElementById("cookie-banner").style.display =
+                        "none";
+                    if (
+                        localStorage.getItem("cookies-accepted") === "granted"
+                    ) {
+                        loadGoogleAnalytics();
+                    }
+                }
+            }
+
+            // Funkce pro přijetí cookies
+            function acceptCookies() {
+                localStorage.setItem("cookies-accepted", "granted");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "granted",
+                });
+                loadGoogleAnalytics();
+            }
+
+            // Funkce pro odmítnutí cookies
+            function declineCookies() {
+                localStorage.setItem("cookies-accepted", "denied");
+                document.getElementById("cookie-banner").style.display = "none";
+                gtag("consent", "update", {
+                    analytics_storage: "denied",
+                });
+            }
+
+            // Zobrazit cookie banner po načtení stránky
+            window.addEventListener("DOMContentLoaded", showCookieBanner);
+        </script>
+        <!-- SEO meta tagy pro Google -->
+        <meta
+            name="description"
+            content="SentrySMP is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="keywords"
+            content="Minecraft, SMP, English, Czech, server, safe, enjoyable, experience, players, vip, premium, exclusive"
+        />
+        <meta name="author" content="Sentry SMP" />
+
+        <!-- Open Graph pro Facebook, Discord, aj. -->
+        <meta property="og:title" content="Sentry SMP" />
+        <meta
+            property="og:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            property="og:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <meta property="og:url" content="https://sentrysmp.eu/" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Cards (volitelné) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sentry SMP" />
+        <meta
+            name="twitter:description"
+            content="Sentry SMP server is a Minecraft server focused on providing a safe and enjoyable experience for players of all ages. It is SMP with addons."
+        />
+        <meta
+            name="twitter:image"
+            content="https://sentrysmp.eu/images/logo.png"
+        />
+        <!-- Language settings -->
+        <meta http-equiv="content-language" content="en" />
+        <meta name="language" content="English" />
+
+        <title>Minecraft Server Rules -Sentry SMP</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="images/favicon.png" />
+        <style>
+            body.dark .header-background {
+                background-image: url("images/background-image-dark.png");
+            }
+
+            body:not(.dark) .header-background {
+                background-image: url("images/background-image.png");
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar" id="navbar-main"></nav>
+
+        <!-- udělat hovery na grid-itemy -->
+        <header id="header-main"></header>
+        <div class="container">
+            <div class="main-wrapper">
+                <h2 class="main">Minecraft Server Rules</h2>
+            </div>
+            <p>
+                By playing on our server, you agree with <b>all</b> these rules:
+            </p>
+            <h3>👥 #1: Respect Other Players</h3>
+            <p>
+                Keep the chat friendly and respectful. No harassment, hate
+                speech, or excessive toxicity.
+            </p>
+
+            <h3>🏰 #2: Griefing and Raiding are Allowed</h3>
+            <p>
+                Griefing and raiding bases are part of the gameplay—protect your
+                stuff (Spawn Griefing is not allowed and gets you a perm IP ban.
+                )!
+            </p>
+
+            <h3>🚫 #3: No Cheating or Exploits</h3>
+            <p>
+                Hacked clients, X-ray mods, and exploiting bugs are strictly
+                prohibited.
+            </p>
+
+            <h3>⚡ #4: No Lag Machines</h3>
+            <p>
+                Don't create anything that causes excessive lag for the server.
+            </p>
+
+            <h3>💬 #5: Chat Conduct</h3>
+            <p>
+                Avoid spamming, advertising, or sharing inappropriate content in
+                chat.
+            </p>
+
+            <h3>⚔️ #6: PvP is Enabled</h3>
+            <p>
+                PvP is allowed, but no intentional harassment or targeting of
+                specific players.
+            </p>
+
+            <h3>⚖️ #7: Staff Decisions Are Final</h3>
+            <p>Listen to staff members and follow their instructions.</p>
+        </div>
+        <footer id="footer-main"></footer>
+        <script src="js/script.js"></script>
+    </body>
+</html>
