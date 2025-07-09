@@ -485,7 +485,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
         <meta http-equiv="content-language" content="en" />
         <meta name="language" content="English" />
 
-        <title>Spawners - Sentry SMP</title>
+        <title>Shards - Sentry SMP</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/style.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -508,7 +508,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
         <header id="header-main"></header>
         <div class="container">
             <div class="main-wrapper">
-                <h1 class="main">Spawners</h1>
+                <h1 class="main">Shards</h1>
             </div>
             <div class="spawner-grid">
                 <?php foreach ($spawners as $s): ?>
@@ -1036,7 +1036,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                     }
                 };
 
-                console.log("Current cart in spawners.php:", savedCart);
+                console.log("Current cart in shards.php:", savedCart);
 
                 // Notification system
                 let notificationContainer = null;

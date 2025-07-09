@@ -297,20 +297,20 @@ if ($should_run_cleanup) {
                 <a href="keys.php"
                     ><li class="thing-grid-item item-green">KEYS</li></a
                 >
-                <a href="spawners.php"
-                    ><li class="thing-grid-item item-red">SPAWNERS</li></a
+                <a href="shards.php"
+                    ><li class="thing-grid-item item-pink">SHARDS</li></a
                 >
                 <a href="ranks.php"
                     ><li class="thing-grid-item item-gold">RANKS</li></a
                 >
                 <a href="news.html"
-                    ><li class="thing-grid-item item-pink">NEWS</li></a
+                    ><li class="thing-grid-item item-red">NEWS</li></a
                 >
-                <a href="commutity.html"
-                    ><li class="thing-grid-item item-turquoise">
-                        COMMUNITY
-                    </li></a
+                <!--
+                <a href="community.html"
+                    ><li class="thing-grid-item item-turquoise">COMMUNITY</li></a
                 >
+                -->
             </ul>
         </div>
 

@@ -310,15 +310,12 @@ a:has(li) {
 }
 .item-red {
     background: linear-gradient(to right, red, orange);
-    font-size: 4rem;
 }
 .item-pink {
     background: linear-gradient(to right, #c200bf, #dba7da);
-    font-size: 4.5rem;
 }
 .item-turquoise {
     background: linear-gradient(to right, turquoise, #a0f0ee);
-    font-size: 3.5rem;
 }
 .item-gold,
 .item-green,
@@ -367,15 +364,6 @@ a:has(li) {
         margin-left: calc((100vw - 350px) / 2);
         margin-right: calc((100vw - 350px) / 2);
         height: 200px;
-    }
-    .item-blue {
-        font-size: 4.8rem;
-    }
-    .item-red {
-        font-size: 3.4rem;
-    }
-    .item-turquoise {
-        font-size: 3.2rem;
     }
 }
 .thing-grid-item.disabled:hover {
@@ -1729,15 +1717,12 @@ body.dark .item-blue {
 }
 body.dark .item-red {
     background: linear-gradient(to right, red, orange);
-    font-size: 4rem;
 }
 body.dark .item-pink {
     background: linear-gradient(to right, #c200bf, #dba7da);
-    font-size: 4.5rem;
 }
 body.dark .item-turquoise {
     background: linear-gradient(to right, turquoise, #a0f0ee);
-    font-size: 3.5rem;
 }
 body.dark .item-gold,
 body.dark .item-green,

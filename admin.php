@@ -266,7 +266,7 @@ $username = htmlspecialchars($_SESSION["username"]);
             </div>
             <ul class="thing-grid">
                 <a href="add_announcements.php"><li class="thing-grid-item">NEWS</li></a>
-                <a href="edit_spawners.php"><li class="thing-grid-item two">SPAWNERS</li></a>
+                <a href="edit_shards.php"><li class="thing-grid-item two">SHARDS</li></a>
                 <a href="edit_keys.php"
                     ><li class="thing-grid-item">KEYS</li></a
                 >

@@ -168,6 +168,16 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
             <div class="main-wrapper">
                 <h2 class="main">Checkout</h2>
             </div>
+            <div class="info">
+                <p>
+                    To receive your purchase, you must be connected to the
+                    Survival server.
+                    <b
+                        >Being in the lobby or another our server is not
+                        enough!</b
+                    >
+                </p>
+            </div>
             <div id="username-output">Loading username...</div>
 
             <div id="order-summary">
@@ -550,7 +560,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                                     orderItem.dataset.id = id;
                                                     orderItem.dataset.quantity = quantity;
                                                     orderItem.dataset.price = price;
-                                                    orderItem.dataset.type = isKeyItem ? 'key' : (isRankItem ? 'rank' : 'spawner');
+                                                    orderItem.dataset.type = isKeyItem ? 'key' : (isRankItem ? 'rank' : 'shard');
                                                     // Check if the item has a discount
                                                     let discountInfo = '';
                                                     if (cartItem && cartItem.discountPercent > 0) {
@@ -574,7 +584,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                                                                     cartItem.price = price;
                                                                                     localStorage.setItem('cart', JSON.stringify(cart));
 
-                                                    console.log(`Added item to order: ${name}, Price: ${price}€, Quantity: ${quantity}, Total: ${itemTotal}€, ID: ${id}, Type: ${isKeyItem ? 'key' : (isRankItem ? 'rank' : 'spawner')}`);
+                                                    console.log(`Added item to order: ${name}, Price: ${price}€, Quantity: ${quantity}, Total: ${itemTotal}€, ID: ${id}, Type: ${isKeyItem ? 'key' : (isRankItem ? 'rank' : 'shard')}`);
 
                                                     // Warn about zero-price items
                                                     if (price === 0) {
@@ -584,7 +594,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                                     // Use actual item price * quantity for the total
                                                     localTotal += itemTotal;
                                                 } catch (err) {
-                                                    console.error(`Error processing ${isKeyItem ? 'key' : 'spawner'}:`, err);
+                                                    console.error(`Error processing ${isKeyItem ? 'key' : 'shard'}:`, err);
                                                 }
                                             }
                                         });
@@ -598,7 +608,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                             orderItems.innerHTML = '';
 
                             // First process spawners
-                            processItemsFromUrl("spawners.php")
+                            processItemsFromUrl("shards.php")
                                 .then(spawnerTotal => {
                                     totalPrice += spawnerTotal;
 
@@ -638,7 +648,7 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                                 errorMessage.className = "order-error";
                                                 errorMessage.innerHTML = `
                                                     <p class="error-text">Your cart appears to be empty or the items have invalid prices.</p>
-                                                    <p>Please <a href="spawners.php">add spawners</a>, <a href="keys.php">add keys</a>, or <a href="ranks.php">add ranks</a> to your cart before checkout.</p>
+                                                    <p>Please <a href="shards.php">add shards</a>, <a href="keys.php">add keys</a>, or <a href="ranks.php">add ranks</a> to your cart before checkout.</p>
                                                     <p><small>Debug info: Cart contains ${cart.length} items. Cart JSON: ${JSON.stringify(cart)}</small></p>
                                                  `;
                                                 orderItems.appendChild(errorMessage);

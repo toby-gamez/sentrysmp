@@ -237,7 +237,16 @@ if (empty($paypalClientId)) {
             <div class="main-wrapper">
                 <h2 class="main">PayPal Gateway</h2>
             </div>
-
+            <div class="info">
+                <p>
+                    To receive your purchase, you must be connected to the
+                    Survival server.
+                    <b
+                        >Being in the lobby or another our server is not
+                        enough!</b
+                    >
+                </p>
+            </div>
             <div id="username-output"></div>
 
             <div id="order-summary">
@@ -692,7 +701,7 @@ if (empty($paypalClientId)) {
                                     errorMessage.className = "order-error";
                                     errorMessage.innerHTML = `
                                         <p class="error-text">Your cart appears to be empty or the items have invalid prices.</p>
-                                        <p>Please <a href="spawners.php">add spawners</a>, <a href="keys.php">add keys</a>, or <a href="ranks.php">add ranks</a> to your cart before checkout.</p>
+                                        <p>Please <a href="shards.php">add shards</a>, <a href="keys.php">add keys</a>, or <a href="ranks.php">add ranks</a> to your cart before checkout.</p>
                                         <p><small>Debug info: Cart contains ${cart.length} items. Cart JSON: ${JSON.stringify(cart)}</small></p>
                                     `;
                                     orderItems.appendChild(errorMessage);

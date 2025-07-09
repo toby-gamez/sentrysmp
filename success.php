@@ -333,9 +333,9 @@ function executeSystemCommand($username, $command)
         <div id="rcon-success" style="display: none; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin: 15px 0; border-radius: 5px;"></div>
 
         <h2>Important Instructions ⚠️</h2>
-        <p>To activate your purchase, you must be online on the server. Operations are automatically performed when this page loads. If you cannot return and log in to the server, please <strong>take a screenshot</strong> of this page as proof and create a <a href="support.php">ticket</a>. Don't worry 😊!</p>
+        <p>To activate your purchase, you must be online on the server. Operations are automatically performed when this page loads. If you cannot return and log in to the server, please <strong>take a screenshot</strong> of this page as proof and create a <a href="support">ticket</a>. Don't worry 😊!</p>
         <hr>
-        <button onclick="window.location.href = 'index'">Home</button>
+        <button onclick="window.location.href = '/'">Home</button>
         <div id="status-message"></div>
 
         <script>
@@ -450,7 +450,7 @@ function executeSystemCommand($username, $command)
                     showStatusMessage("Košík nebyl nalezen – aktivace nemůže proběhnout. <br>Zkuste se vrátit na <a href='checkout.php'>checkout</a> a zopakovat platbu, nebo kontaktujte podporu.", "error");
                     const rconError = document.getElementById('rcon-error');
                     if (rconError) {
-                        rconError.innerHTML = '<strong>Chyba aktivace:</strong> <br>Košík nebyl nalezen – aktivace nemůže proběhnout.<br><a href="checkout.php" style="margin-top: 5px; display:inline-block;">Zpět na checkout</a> nebo <a href="support.php">Kontaktujte podporu</a>';
+                        rconError.innerHTML = '<strong>Chyba aktivace:</strong> <br>Košík nebyl nalezen – aktivace nemůže proběhnout.<br><a href="checkout.php" style="margin-top: 5px; display:inline-block;">Zpět na checkout</a> nebo <a href="support">Kontaktujte podporu</a>';
                         rconError.style.display = 'block';
                         rconError.scrollIntoView({behavior: 'smooth'});
                     }
@@ -517,7 +517,7 @@ function executeSystemCommand($username, $command)
                                 rconError.innerHTML = '<strong>Error with activation:</strong> ' +
                                     '<pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
                                     (data.message ? data.message.replace(/commands/g, "operations").replace(/Commands/g, "Operations").replace(/command/g, "operation").replace(/Command/g, "Operation") : "Neznámá chyba") + '</pre>' +
-                                    '<br><button onclick="window.location.reload()" style="margin-top: 5px;">Try Again</button> or <a href="support.php">Contact Support</a>';
+                                    '<br><button onclick="window.location.reload()" style="margin-top: 5px;">Try Again</button> or <a href="support">Contact Support</a>';
                                 rconError.style.display = 'block';
                                 rconError.scrollIntoView({behavior: 'smooth'});
                             }

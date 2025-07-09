@@ -1,4 +1,3 @@
-<!-- edit_spawners.php -->
 <?php
 // Start session at the beginning
 session_start();
@@ -87,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $result = $stmt->execute($params);
 
             if (!$result) {
-                throw new PDOException("Failed to insert new spawner");
+                throw new PDOException("Failed to insert new shard");
             }
         } catch (PDOException $e) {
             echo "Insert error: " . $e->getMessage();
@@ -101,7 +100,7 @@ try {
         ->query("SELECT * FROM spawners")
         ->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo "Error retrieving spawners: " . $e->getMessage();
+    echo "Error retrieving shards: " . $e->getMessage();
     exit();
 }
 
@@ -282,11 +281,11 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
             window.addEventListener('DOMContentLoaded', function() {
                 <?php if ($_SERVER["REQUEST_METHOD"] === "POST"): ?>
                     <?php if (isset($_POST["delete"])): ?>
-                        showNotification("Spawner successfully deleted", "success");
+                        showNotification("Shard successfully deleted", "success");
                     <?php elseif (isset($_POST["update"])): ?>
-                        showNotification("Spawner successfully updated", "success");
+                        showNotification("Shard successfully updated", "success");
                     <?php elseif (isset($_POST["add"])): ?>
-                        showNotification("New spawner successfully added", "success");
+                        showNotification("New shard successfully added", "success");
                     <?php endif; ?>
                 <?php endif; ?>
             });
@@ -330,7 +329,7 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
         <meta http-equiv="content-language" content="en" />
         <meta name="language" content="English" />
 
-        <title>Edit Spawners - Admin Panel - Sentry SMP</title>
+        <title>Edit Shards - Admin Panel - Sentry SMP</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/style.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -351,7 +350,7 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
         <!-- udělat hovery na grid-itemy -->
         <div class="container">
             <div class="main-wrapper">
-                <h1 class="main">Edit Spawners</h1>
+                <h1 class="main">Edit Shards</h1>
             </div>
             <p>When you need to add player name, use "<b><code>$usernamemc</code></b>".</p>
             <?php foreach ($spawners as $s): ?>
@@ -373,13 +372,13 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
                     <input type="number" name="sales" placeholder="Discount %" min="0" max="100" value="<?= htmlspecialchars(
                         $s["sales"] ?? ""
                     ) ?>">
-                    <button type="submit" name="update" onclick="showNotification('Updating spawner...', 'info', 1500)">Edit</button>
-                    <button type="submit" class="danger" name="delete" onclick="return confirm('Are you sure you want to delete this spawner?') && showNotification('Removing spawner...', 'info', 1500);">Remove</button>
+                    <button type="submit" name="update" onclick="showNotification('Updating shard...', 'info', 1500)">Edit</button>
+                    <button type="submit" class="danger" name="delete" onclick="return confirm('Are you sure you want to delete this shard?') && showNotification('Removing shard...', 'info', 1500);">Remove</button>
                 </form>
             </div>
             <?php endforeach; ?>
             <div class="main-wrapper">
-            <h2 class="main">Add New Spawner</h2>
+            <h2 class="main">Add New Shard</h2>
             </div>
             <p>When you need to add player name, use "<b><code>$usernamemc</code></b>".</p>
             <form method="post" enctype="multipart/form-data">
@@ -388,7 +387,7 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
                 <input type="file" name="new_obrazek" accept="image/*">
                 <input type="text" name="new_prikaz" placeholder="Command">
                 <input type="number" name="new_sales" placeholder="Discount %" min="0" max="100">
-                <button type="submit" name="add" onclick="showNotification('Adding new spawner...', 'info', 1500)">Přidat</button>
+                <button type="submit" name="add" onclick="showNotification('Adding new shard...', 'info', 1500)">Přidat</button>
                 <p>For discount, enter a percentage (0-100). Leave empty for no discount or write 0.</p>
             </form>
         </div>

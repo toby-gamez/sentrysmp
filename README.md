@@ -47,7 +47,7 @@ SentrySMP is a comprehensive Minecraft server management system featuring:
 │                    SentrySMP Architecture                   │
 ├─────────────────────────────────────────────────────────────┤
 │  Frontend (Web Interface)                                  │
-│  ├── User Pages (spawners.php, keys.php, ranks.php)       │
+│  ├── User Pages (shards.php, keys.php, ranks.php)       │
 │  ├── Shopping Cart (cart.html, checkout.php)              │
 │  ├── Authentication (login-players.php)                   │
 │  └── Admin Panel (admin.php, vip_manager.php)             │
@@ -120,7 +120,7 @@ ADMIN_PASSWORD_3=secure_password_3
 The system automatically creates SQLite databases on first run:
 ```bash
 php create_db.php
-php create_spawners_table.php
+php create_shards_table.php
 php create_table.php
 ```
 
@@ -176,7 +176,7 @@ Edit these files for server-specific configuration:
 ## 🎮 Features
 
 ### 🛒 E-commerce System
-- **Multi-item Shopping Cart**: Add spawners, keys, and ranks
+- **Multi-item Shopping Cart**: Add shards, keys, and ranks
 - **Dynamic Pricing**: Quantity-based discounts
 - **Payment Processing**: Stripe and PayPal integration
 - **Order Management**: Complete transaction tracking
@@ -189,8 +189,8 @@ Edit these files for server-specific configuration:
 
 ### 🎯 Shop Categories
 
-#### Spawners (`spawners.php`)
-- Mob spawners with custom prices
+#### Shards (`shards.php`)
+- Points do buy spawners
 - Quantity-based purchasing
 - Automatic RCON delivery
 
@@ -230,7 +230,7 @@ sentrysmp/
 │
 ├── 🏠 Frontend Pages
 │   ├── index.php                 # Homepage with VIP cleanup
-│   ├── spawners.php              # Spawner shop
+│   ├── shards.php                # Shards shop
 │   ├── keys.php                  # Keys shop
 │   ├── ranks.php                 # Ranks shop
 │   ├── cart.html                 # Shopping cart
@@ -262,7 +262,7 @@ sentrysmp/
 │   ├── vip_manager.php           # VIP user management
 │   ├── vip-list.php              # VIP user listing
 │   ├── paid-list.php             # Payment history
-│   ├── edit_spawners.php         # Spawner editor
+│   ├── edit_shards.php           # Shard editor
 │   ├── edit_keys.php             # Key editor
 │   └── edit_ranks.php            # Rank editor
 │
@@ -273,7 +273,7 @@ sentrysmp/
 │   └── get_commands.php          # Command execution API
 │
 ├── 🗄️ Database Files
-│   ├── blog.sqlite               # Spawners database
+│   ├── blog.sqlite               # Shards database
 │   ├── keys.sqlite               # Keys database
 │   ├── ranks.sqlite              # Ranks database
 │   ├── vip.sqlite                # VIP users database
@@ -341,7 +341,7 @@ sentrysmp/
 
 ## 🗄️ Database Schema
 
-### Spawners Table (`blog.sqlite`)
+### Shards Table (`blog.sqlite`)
 ```sql
 CREATE TABLE spawners (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -395,7 +395,7 @@ CREATE TABLE vip_users (
 **VIP Detection Logic:**
 - Automatically detects VIP purchases based on rank name or command containing:
   - "vip" (case insensitive)
-  - "premium" (case insensitive)  
+  - "premium" (case insensitive)
   - "membership" (case insensitive)
 - When VIP rank is purchased, user is automatically added to `vip_users` table
 - Enhanced logging for VIP detection debugging
@@ -489,8 +489,8 @@ $rcon->sendCommand($command);
 
 #### Item Delivery
 ```php
-// Give spawner to player
-$command = "give {$username} spawner 1";
+// Give shard to player
+$command = "points $usernamemc {amount};
 $rcon->sendCommand($command);
 ```
 
@@ -520,7 +520,7 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
 - RCON permission sync
 
 #### Database Editors
-- **Spawners**: Add/edit/delete spawners
+- **Shards**: Add/edit/delete shard
 - **Keys**: Manage treasure keys
 - **Ranks**: Configure rank packages
 
@@ -652,12 +652,12 @@ tail -f vip_rcon_log.txt
 2. **Verify Transaction and VIP Status:**
    ```sql
    -- Recent transactions with amounts
-   SELECT username, transaction_id, amount, cart_data, created_at 
+   SELECT username, transaction_id, amount, cart_data, created_at
    FROM users ORDER BY created_at DESC LIMIT 10;
-   
+
    -- Current VIP users with expiry
-   SELECT username, created_at, 
-          julianday('now') - julianday(created_at) as days_old 
+   SELECT username, created_at,
+          julianday('now') - julianday(created_at) as days_old
    FROM vip_users;
    ```
 
@@ -721,7 +721,7 @@ SELECT username, transaction_id, amount, cart_data, created_at
 FROM users ORDER BY created_at DESC;
 
 -- Check VIP users with expiry info
-SELECT username, created_at, 
+SELECT username, created_at,
        datetime(created_at, '+30 days') as expires_at,
        julianday('now') - julianday(created_at) as days_old
 FROM vip_users;
@@ -733,7 +733,7 @@ LEFT JOIN vip_users v ON u.username = v.username
 WHERE u.cart_data LIKE '%rank_%' AND v.username IS NULL;
 
 -- Manual transaction addition
-INSERT INTO users (username, transaction_id, amount, cart_data) 
+INSERT INTO users (username, transaction_id, amount, cart_data)
 VALUES ('username_here', 'tx_12345', 10.00, '[{"id":"rank_2","quantity":1,"price":10.00}]');
 
 -- Manual VIP addition
