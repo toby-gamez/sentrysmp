@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="footer-column">
             <h3>Rules</h3>
             <ul>
-                <li><a href="rules.html">Server Rules</a></li>
+                <li><a href="rules.html">DiscordServer Rules</a></li>
                 <li><a href="rules-minecraft.html">Minecraft Server Rules</a></li>
                 <li><a href="privacy-policy.html">Privacy Policy</a></li>
                 <li><a href="terms-of-use.html">Terms of Use</a></li>
