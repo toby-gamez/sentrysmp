@@ -76,14 +76,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     try {
         $db = new SQLite3("paid_users.sqlite");
         $db->exec(
-            "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
+            "CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                transaction_id TEXT UNIQUE,
+                cart_data TEXT,
+                amount REAL DEFAULT 0.0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )"
         );
+
+        // Generate a fallback transaction ID if not provided
+        $fallback_tx_id = "manual_" . time() . "_" . rand(100, 999);
+
         $stmt = $db->prepare(
-            "INSERT OR IGNORE INTO users (username) VALUES (:username)"
+            "INSERT OR IGNORE INTO users (username, transaction_id, amount) VALUES (:username, :transaction_id, :amount)"
         );
         $stmt->bindValue(":username", $username, SQLITE3_TEXT);
+        $stmt->bindValue(":transaction_id", $fallback_tx_id, SQLITE3_TEXT);
+        $stmt->bindValue(":amount", 0.0, SQLITE3_FLOAT);
         $result = $stmt->execute();
-        echo json_encode(["success" => true]);
+        echo json_encode([
+            "success" => true,
+            "transaction_id" => $fallback_tx_id,
+        ]);
     } catch (Exception $e) {
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }

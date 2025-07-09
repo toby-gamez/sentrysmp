@@ -254,8 +254,7 @@ sentrysmp/
 │
 ├── 🎮 RCON Integration
 │   ├── cart-rcon.php             # Cart RCON commands
-│   ├── vip-rcon.php              # VIP RCON functions
-│   └── vip-send_rcon.php         # VIP command sender
+│   └── vip-rcon.php              # VIP RCON functions
 │
 ├── 👑 Admin Panel
 │   ├── admin.php                 # Main admin dashboard
@@ -383,24 +382,49 @@ CREATE TABLE ranks (
 CREATE TABLE vip_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME,
-    payment_id TEXT
-);
-```
-
-### Paid Users Table (`paid_users.sqlite`)
-```sql
-CREATE TABLE paid_users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    transaction_id TEXT UNIQUE,
-    amount REAL NOT NULL,
-    payment_method TEXT,
-    cart_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+**VIP System Overview:**
+- **Duration**: VIP access lasts 30 days from purchase date
+- **Auto-cleanup**: Expired VIP users are automatically removed
+- **RCON Integration**: Automatic permission management via RCON commands
+- **Database Tracking**: All VIP purchases tracked in `vip_users` table
+
+**VIP Detection Logic:**
+- Automatically detects VIP purchases based on rank name or command containing:
+  - "vip" (case insensitive)
+  - "premium" (case insensitive)  
+  - "membership" (case insensitive)
+- When VIP rank is purchased, user is automatically added to `vip_users` table
+- Enhanced logging for VIP detection debugging
+
+**VIP Management Files:**
+- `vip_manager.php` - Admin panel for VIP user management
+- `vip-list.php` - Public VIP user list
+- `vip-rcon.php` - RCON permission management
+- `auto_cleanup.php` - Automated cleanup script
+- `index.php` - Automatic cleanup on page loads
+
+### Paid Users Table (`paid_users.sqlite`)
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    transaction_id TEXT UNIQUE,
+    cart_data TEXT,
+    amount REAL DEFAULT 0.0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Enhanced Transaction Tracking:**
+- **All purchases** are automatically saved to `paid_users.sqlite`
+- **VIP purchases** are additionally saved to `vip.sqlite`
+- **Cart data** is stored as JSON for detailed transaction history
+- **Amount calculation** includes quantity × price for all items
+- **Transaction ID** uniquely identifies each purchase
 
 ## 💳 Payment Integration
 
@@ -580,7 +604,7 @@ server {
     listen 443 ssl http2;
     ssl_certificate /path/to/certificate.crt;
     ssl_certificate_key /path/to/private.key;
-    
+
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
@@ -609,6 +633,57 @@ telnet your_minecraft_server 25575
 tail -f vip_rcon_log.txt
 ```
 
+#### VIP System Issues
+
+**Symptoms:**
+- VIP purchase successful but user not in `vip_users` table
+- RCON commands execute but database entry missing
+- Users disappearing from VIP list after purchase
+- Transaction not recorded in `paid_users` table
+
+**Root Cause Analysis:**
+1. **Auto-Cleanup System**: VIP users are automatically removed after 30 days
+2. **Detection Issues**: VIP ranks not properly detected during purchase
+3. **Database Errors**: SQLite permission or corruption issues
+4. **Transaction Flow**: Issues in `execute_db_command.php` process
+
+**Debug Steps:**
+
+2. **Verify Transaction and VIP Status:**
+   ```sql
+   -- Recent transactions with amounts
+   SELECT username, transaction_id, amount, cart_data, created_at 
+   FROM users ORDER BY created_at DESC LIMIT 10;
+   
+   -- Current VIP users with expiry
+   SELECT username, created_at, 
+          julianday('now') - julianday(created_at) as days_old 
+   FROM vip_users;
+   ```
+
+2. **Check Cleanup Logs:**
+   ```bash
+   tail -f vip_cleanup_log.txt
+   ```
+
+5. **Expected Log Entries:**
+   ```
+   SUCCESS: Transaction saved to paid_users database: username (Amount: 10.00, Transaction: tx_123)
+   VIP Detection - Rank: VIP Membership, IsVIP: YES
+   SUCCESS: VIP user saved to database: username (Reason: VIP found in name)
+   ```
+
+4. **Manual VIP Management:**
+   - Add VIP: Use admin panel `/vip_manager`
+   - Check expiry: VIP expires 30 days after `created_at`
+   - Manual cleanup: Direct SQL commands (see below)
+
+**Common Issues:**
+- **Auto-cleanup too aggressive**: Check `index.php` cleanup throttling
+- **Rank name mismatch**: Ensure rank contains "vip", "premium", or "membership"
+- **Database permissions**: `chmod 664 vip.sqlite`
+- **RCON failures**: Check RCON connectivity in cleanup logs
+
 #### Database Corruption
 ```bash
 # Check database integrity
@@ -628,6 +703,42 @@ APP_DEBUG=true
 - `vip_rcon_log.txt` - RCON operation logs
 - `vip_cleanup_log.txt` - VIP cleanup logs
 - `debug.txt` - General debug information
+
+## 🔧 Debug Tools
+
+### VIP System Debug Tools
+
+**VIP System Management**
+- Use admin panel at `/vip_manager` for VIP user management
+- Check VIP cleanup logs in `vip_cleanup_log.txt`
+- Monitor RCON operations in `vip_rcon_log.txt`
+- Review enhanced VIP detection logic in `execute_db_command.php`
+
+**Database Direct Access**
+```sql
+-- Check all transactions with details
+SELECT username, transaction_id, amount, cart_data, created_at
+FROM users ORDER BY created_at DESC;
+
+-- Check VIP users with expiry info
+SELECT username, created_at, 
+       datetime(created_at, '+30 days') as expires_at,
+       julianday('now') - julianday(created_at) as days_old
+FROM vip_users;
+
+-- Find transactions without VIP records (potential issues)
+SELECT u.username, u.amount, u.cart_data, u.created_at
+FROM users u
+LEFT JOIN vip_users v ON u.username = v.username
+WHERE u.cart_data LIKE '%rank_%' AND v.username IS NULL;
+
+-- Manual transaction addition
+INSERT INTO users (username, transaction_id, amount, cart_data) 
+VALUES ('username_here', 'tx_12345', 10.00, '[{"id":"rank_2","quantity":1,"price":10.00}]');
+
+-- Manual VIP addition
+INSERT INTO vip_users (username) VALUES ('username_here');
+```
 
 ## 🤝 Contributing
 
@@ -672,7 +783,3 @@ For support and questions:
 - **Email**: support@sentrysmp.eu
 
 ---
-
-**Last Updated**: January 2024
-**Version**: 2.0.0
-**Minecraft Compatibility**: 1.20+

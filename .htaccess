@@ -35,3 +35,6 @@ RewriteRule ^(.*)\.php$ /$1 [R=301,L]
 
 # Nastavení vlastní 404 stránky
 ErrorDocument 404 /404.html
+RewriteCond %{REQUEST_URI} ^/404\.html$
+RewriteCond %{REQUEST_FILENAME} !-f
+ErrorDocument 404 /maintenance.html

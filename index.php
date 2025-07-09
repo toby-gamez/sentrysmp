@@ -6,6 +6,11 @@ require_once "vip-rcon.php";
 function cleanupExpiredVipUsers()
 {
     try {
+        // Check if database exists
+        if (!file_exists("vip.sqlite")) {
+            return 0;
+        }
+
         $db = new SQLite3("vip.sqlite");
 
         // Helper function to calculate days left
@@ -25,39 +30,69 @@ function cleanupExpiredVipUsers()
         // Find and delete expired users
         $result = $db->query("SELECT id, username, created_at FROM vip_users");
         $deleted_count = 0;
+        $failed_count = 0;
 
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             $days_left = getDaysLeft($row["created_at"]);
             if ($days_left <= 0) {
-                // First remove the VIP permissions via RCON
                 $remove_name = $row["username"];
-                $rcon_result = removeVipPermissions($remove_name);
 
-                // Then delete the expired user from database
+                // First remove the VIP permissions via RCON (non-blocking)
+                $rcon_result = false;
                 try {
-                    $stmt = $db->prepare(
-                        "DELETE FROM vip_users WHERE username = :username"
-                    );
-                    $stmt->bindValue(":username", $remove_name, SQLITE3_TEXT);
-                    $stmt->execute();
-                    $deleted_count++;
-
-                    // Log the complete removal
+                    $rcon_result = removeVipPermissions($remove_name);
+                } catch (Exception $rcon_e) {
+                    // Log RCON error but continue with database cleanup
                     $log_message =
                         date("Y-m-d H:i:s") .
-                        " - Removed VIP user: $remove_name - RCON: " .
-                        ($rcon_result ? "Success" : "Failed") .
+                        " - RCON error for $remove_name: " .
+                        $rcon_e->getMessage() .
                         "\n";
                     file_put_contents(
                         "vip_cleanup_log.txt",
                         $log_message,
                         FILE_APPEND
                     );
+                }
+
+                // Always try to delete from database regardless of RCON result
+                try {
+                    $stmt = $db->prepare(
+                        "DELETE FROM vip_users WHERE username = :username"
+                    );
+                    $stmt->bindValue(":username", $remove_name, SQLITE3_TEXT);
+                    $result_execute = $stmt->execute();
+
+                    if ($result_execute) {
+                        $deleted_count++;
+
+                        // Log successful removal
+                        $log_message =
+                            date("Y-m-d H:i:s") .
+                            " - Removed VIP user: $remove_name - RCON: " .
+                            ($rcon_result ? "Success" : "Failed") .
+                            " - Database: Success\n";
+                        file_put_contents(
+                            "vip_cleanup_log.txt",
+                            $log_message,
+                            FILE_APPEND
+                        );
+                    } else {
+                        $failed_count++;
+                        $log_message =
+                            date("Y-m-d H:i:s") .
+                            " - Failed to delete from database: $remove_name\n";
+                        file_put_contents(
+                            "vip_cleanup_log.txt",
+                            $log_message,
+                            FILE_APPEND
+                        );
+                    }
                 } catch (Exception $e) {
-                    // Silent error handling
+                    $failed_count++;
                     $log_message =
                         date("Y-m-d H:i:s") .
-                        " - Failed to remove VIP user from database: $remove_name - Error: " .
+                        " - Database deletion error for $remove_name: " .
                         $e->getMessage() .
                         "\n";
                     file_put_contents(
@@ -69,11 +104,14 @@ function cleanupExpiredVipUsers()
             }
         }
 
-        // Optional: log cleanup activity summary
-        if ($deleted_count > 0) {
+        // Close database connection
+        $db->close();
+
+        // Log cleanup summary
+        if ($deleted_count > 0 || $failed_count > 0) {
             $log_message =
                 date("Y-m-d H:i:s") .
-                " - Summary: Removed $deleted_count expired VIP users\n";
+                " - Cleanup summary: Removed $deleted_count expired VIP users, $failed_count failures\n";
             file_put_contents("vip_cleanup_log.txt", $log_message, FILE_APPEND);
         }
 
@@ -82,7 +120,7 @@ function cleanupExpiredVipUsers()
         // Log error
         $log_message =
             date("Y-m-d H:i:s") .
-            " - Error in VIP cleanup process: " .
+            " - Critical error in VIP cleanup process: " .
             $e->getMessage() .
             "\n";
         file_put_contents("vip_cleanup_log.txt", $log_message, FILE_APPEND);
@@ -90,8 +128,28 @@ function cleanupExpiredVipUsers()
     }
 }
 
-// Run cleanup on 100% of page loads
-cleanupExpiredVipUsers();
+// Run cleanup on page loads (with throttling to prevent excessive execution)
+$cleanup_file = "last_cleanup.txt";
+$should_run_cleanup = true;
+
+if (file_exists($cleanup_file)) {
+    $last_cleanup = (int) file_get_contents($cleanup_file);
+    $time_since_cleanup = time() - $last_cleanup;
+
+    // Only run cleanup if it's been at least 1 hour since last cleanup
+    if ($time_since_cleanup < 3600) {
+        $should_run_cleanup = false;
+    }
+}
+
+if ($should_run_cleanup) {
+    $deleted_count = cleanupExpiredVipUsers();
+    file_put_contents($cleanup_file, time());
+
+    if ($deleted_count > 0) {
+        error_log("VIP Cleanup: Removed $deleted_count expired users");
+    }
+}
 ?>
 <!doctype html>
 <html>

@@ -28,12 +28,76 @@ $username = isset($data["username"])
 // Get cart data from the request - if no cart, exit early
 $cart = isset($data["cart"]) ? $data["cart"] : [];
 
+// Initialize response array
+$response = [
+    "success" => false,
+    "message" => "",
+    "command" => "",
+];
+
 // If no cart is provided, exit early to prevent executing all commands
 if (empty($cart)) {
     $response["success"] = false;
     $response["message"] = "No items in cart to process";
     echo json_encode($response);
     exit();
+}
+
+// Function to save transaction to paid_users database
+function saveToPaidUsers($username, $cart, $transactionId)
+{
+    try {
+        $db = new SQLite3("paid_users.sqlite");
+
+        // Create enhanced table structure if it doesn't exist
+        $db->exec("CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            transaction_id TEXT UNIQUE,
+            cart_data TEXT,
+            amount REAL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+
+        // Calculate total amount from cart
+        $total_amount = 0;
+        foreach ($cart as $item) {
+            if (isset($item["price"]) && isset($item["quantity"])) {
+                $total_amount +=
+                    floatval($item["price"]) * intval($item["quantity"]);
+            }
+        }
+
+        // Save transaction
+        $stmt = $db->prepare(
+            "INSERT OR IGNORE INTO users (username, transaction_id, cart_data, amount) VALUES (:username, :transaction_id, :cart_data, :amount)"
+        );
+        $stmt->bindValue(":username", $username, SQLITE3_TEXT);
+        $stmt->bindValue(":transaction_id", $transactionId, SQLITE3_TEXT);
+        $stmt->bindValue(":cart_data", json_encode($cart), SQLITE3_TEXT);
+        $stmt->bindValue(":amount", $total_amount, SQLITE3_FLOAT);
+        $result = $stmt->execute();
+
+        $db->close();
+
+        if ($result) {
+            error_log(
+                "SUCCESS: Transaction saved to paid_users database: $username (Amount: $total_amount, Transaction: $transactionId)"
+            );
+            return true;
+        } else {
+            error_log(
+                "FAILED: Could not save transaction to paid_users database: $username"
+            );
+            return false;
+        }
+    } catch (Exception $e) {
+        error_log(
+            "ERROR: Exception while saving transaction to paid_users database: " .
+                $e->getMessage()
+        );
+        return false;
+    }
 }
 
 // Check if cart is in new format (objects with id, quantity, price) or old format
@@ -69,13 +133,6 @@ error_log("Cart contents: " . json_encode($cart));
 
 // Log the username we're using
 error_log("Using username for RCON commands: " . $username);
-
-// Initialize response array
-$response = [
-    "success" => false,
-    "message" => "",
-    "command" => "",
-];
 
 // Verify username
 if (!$username) {
@@ -229,6 +286,9 @@ try {
     $rcon = new Rcon($host, $port, $password, $timeout);
 
     if ($rcon->connect()) {
+        // Save transaction to paid_users database first
+        saveToPaidUsers($username, $cart, $transactionId);
+
         $successfulCommands = [];
         $failedCommands = [];
 
@@ -429,31 +489,123 @@ try {
                 } elseif ($cmd["type"] === "rank") {
                     $executedCommandIds["rank"][] = $cmd["originalId"];
 
-                    // Special handling for VIP rank - save to vip.sqlite database
+                    // Enhanced VIP detection with better debugging
+                    $isVipRank = false;
+                    $vipDetectionReason = "";
+
+                    // Check for VIP in name (case insensitive)
+                    if (stripos($cmd["name"], "vip") !== false) {
+                        $isVipRank = true;
+                        $vipDetectionReason =
+                            "VIP found in name: " . $cmd["name"];
+                    }
+
+                    // Check for VIP in command (case insensitive)
+                    if (stripos($cmd["command"], "vip") !== false) {
+                        $isVipRank = true;
+                        $vipDetectionReason .=
+                            ($vipDetectionReason ? " AND " : "") .
+                            "VIP found in command: " .
+                            $cmd["command"];
+                    }
+
+                    // Additional checks for common VIP patterns
                     if (
-                        stripos($cmd["name"], "vip") !== false ||
-                        stripos($cmd["command"], "vip") !== false
+                        stripos($cmd["name"], "premium") !== false ||
+                        stripos($cmd["command"], "premium") !== false ||
+                        stripos($cmd["name"], "membership") !== false ||
+                        preg_match(
+                            "/\b(vip|premium|member)\b/i",
+                            $cmd["name"]
+                        ) ||
+                        preg_match(
+                            "/\b(vip|premium|member)\b/i",
+                            $cmd["command"]
+                        )
                     ) {
+                        $isVipRank = true;
+                        $vipDetectionReason .=
+                            ($vipDetectionReason ? " AND " : "") .
+                            "Premium/Membership pattern detected";
+                    }
+
+                    // Log VIP detection attempt
+                    error_log(
+                        "VIP Detection - Rank: " .
+                            $cmd["name"] .
+                            ", Command: " .
+                            $cmd["command"] .
+                            ", IsVIP: " .
+                            ($isVipRank ? "YES" : "NO") .
+                            ", Reason: " .
+                            ($vipDetectionReason ?: "No VIP pattern found")
+                    );
+
+                    // Special handling for VIP rank - save to vip.sqlite database
+                    if ($isVipRank) {
                         try {
+                            error_log(
+                                "Attempting to save VIP user to database: " .
+                                    $username
+                            );
+
                             $dbVip = new SQLite3("vip.sqlite");
                             $dbVip->exec(
                                 "CREATE TABLE IF NOT EXISTS vip_users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                             );
-                            $stmtVip = $dbVip->prepare(
-                                "INSERT OR IGNORE INTO vip_users (username) VALUES (:username)"
+
+                            // Check if user already exists
+                            $checkStmt = $dbVip->prepare(
+                                "SELECT COUNT(*) as count FROM vip_users WHERE username = :username"
                             );
-                            $stmtVip->bindValue(
+                            $checkStmt->bindValue(
                                 ":username",
                                 $username,
                                 SQLITE3_TEXT
                             );
-                            $stmtVip->execute();
-                            error_log(
-                                "VIP user saved to database: " . $username
-                            );
+                            $checkResult = $checkStmt->execute();
+                            $existingCount = $checkResult->fetchArray(
+                                SQLITE3_ASSOC
+                            )["count"];
+
+                            if ($existingCount > 0) {
+                                error_log(
+                                    "VIP user already exists in database: " .
+                                        $username
+                                );
+                            } else {
+                                $stmtVip = $dbVip->prepare(
+                                    "INSERT INTO vip_users (username) VALUES (:username)"
+                                );
+                                $stmtVip->bindValue(
+                                    ":username",
+                                    $username,
+                                    SQLITE3_TEXT
+                                );
+                                $result = $stmtVip->execute();
+
+                                if ($result) {
+                                    error_log(
+                                        "SUCCESS: VIP user saved to database: " .
+                                            $username .
+                                            " (Reason: " .
+                                            $vipDetectionReason .
+                                            ")"
+                                    );
+                                } else {
+                                    error_log(
+                                        "FAILED: Could not save VIP user to database: " .
+                                            $username
+                                    );
+                                }
+                            }
+
+                            $dbVip->close();
                         } catch (Exception $e) {
                             error_log(
-                                "Error saving VIP user to database: " .
+                                "ERROR: Exception while saving VIP user to database: " .
+                                    $username .
+                                    " - " .
                                     $e->getMessage()
                             );
                         }

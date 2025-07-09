@@ -4,3 +4,5 @@
 2025-07-05 18:14:22 - Removed VIP user: Axas_MC - RCON: Success
 2025-07-05 18:14:22 - Removed VIP user: Taneq - RCON: Success
 2025-07-05 18:14:22 - Summary: Removed 2 expired VIP users
+2025-07-09 11:18:28 - Manual cleanup: Deleted expired user: Axas_MC
+2025-07-09 11:18:28 - Manual cleanup: Deleted expired user: Taneq
