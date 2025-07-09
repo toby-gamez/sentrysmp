@@ -411,41 +411,57 @@ function executeSystemCommand($username, $command)
                     return;
                 }
 
-                // Try to get cart from URL first, then fallback to localStorage
-                // Get cart from URL or localStorage
-                                let cart;
-                                const urlParams = new URLSearchParams(window.location.search);
-                                const cartParam = urlParams.get('cart');
+                let cart;
+                const urlParams = new URLSearchParams(window.location.search);
+                const cartParam = urlParams.get('cart');
 
-                                console.log("URL parameters:", window.location.search);
-                                console.log("Cart parameter from URL:", cartParam);
+                console.log("URL parameters:", window.location.search);
+                console.log("Cart parameter from URL:", cartParam);
 
-                                if (cartParam) {
-                                    try {
-                                        cart = JSON.parse(decodeURIComponent(cartParam));
-                                        console.log("Cart from URL (parsed):", cart);
-                                        // Save to localStorage for consistency
-                                        localStorage.setItem('cart', JSON.stringify(cart));
-                                    } catch (e) {
-                                        console.error("Error parsing cart from URL:", e);
-                                        cart = JSON.parse(localStorage.getItem('cart') || '[]');
-                                        console.log("Falling back to localStorage cart:", cart);
-                                    }
-                                } else {
-                                    cart = JSON.parse(localStorage.getItem('cart') || '[]');
-                                    console.log("No cart in URL, using localStorage cart:", cart);
-                                }
+                // 1. Zkusit načíst z URL
+                if (cartParam) {
+                    try {
+                        cart = JSON.parse(decodeURIComponent(cartParam));
+                        console.log("Cart from URL (parsed):", cart);
+                        // Save to localStorage for consistency
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                    } catch (e) {
+                        console.error("Error parsing cart from URL:", e);
+                        cart = null;
+                    }
+                }
 
-                                // Force cart to be array if it somehow became undefined or null
-                                if (!cart || !Array.isArray(cart)) {
-                                    console.warn("Cart is not an array, resetting to empty array");
-                                    cart = [];
-                                }
+                // 2. Pokud není v URL nebo je nevalidní, zkusit z localStorage
+                if (!cart || !Array.isArray(cart) || cart.length === 0) {
+                    try {
+                        const localCart = localStorage.getItem('cart');
+                        if (localCart) {
+                            cart = JSON.parse(localCart);
+                            console.log("Cart from localStorage (parsed):", cart);
+                        }
+                    } catch (e) {
+                        console.error("Error parsing cart from localStorage:", e);
+                        cart = [];
+                    }
+                }
 
-                                console.log("Final cart being sent to execute_db_command.php:", cart);
+                // 3. Pokud stále není validní nebo je prázdný, zobraz jasnou chybu a nabídni návrat na checkout
+                if (!cart || !Array.isArray(cart) || cart.length === 0) {
+                    showStatusMessage("Košík nebyl nalezen – aktivace nemůže proběhnout. <br>Zkuste se vrátit na <a href='checkout.php'>checkout</a> a zopakovat platbu, nebo kontaktujte podporu.", "error");
+                    const rconError = document.getElementById('rcon-error');
+                    if (rconError) {
+                        rconError.innerHTML = '<strong>Chyba aktivace:</strong> <br>Košík nebyl nalezen – aktivace nemůže proběhnout.<br><a href="checkout.php" style="margin-top: 5px; display:inline-block;">Zpět na checkout</a> nebo <a href="support.php">Kontaktujte podporu</a>';
+                        rconError.style.display = 'block';
+                        rconError.scrollIntoView({behavior: 'smooth'});
+                    }
+                    return;
+                }
+
+                // 4. Logování pro debug
+                console.log("Final cart being sent to execute_db_command.php:", cart);
 
                 // Direct PHP call to execute all operations
-                fetch("execute_db_command.php", {
+                fetch("execute_db_command", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -455,44 +471,71 @@ function executeSystemCommand($username, $command)
                         cart: cart
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => response.text())
+                .then(text => {
+                    console.log("Raw backend response:", text);
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        showStatusMessage("Backend nevrátil validní JSON: " + text, "error");
+                        const rconError = document.getElementById('rcon-error');
+                        if (rconError) {
+                            rconError.innerHTML = '<strong>Chyba komunikace s backendem:</strong><br><pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
+                                text + '</pre>';
+                            rconError.style.display = 'block';
+                            rconError.scrollIntoView({behavior: 'smooth'});
+                        }
+                        return;
+                    }
                     if (data.success) {
-                            console.log("All operations executed successfully");
-                            showStatusMessage("All operations completed successfully", "success");
-                            document.getElementById('rcon-success').innerHTML = '<strong>Operations completed successfully!</strong> <span style="display:inline-block;margin-left:10px">✅</span>';
-                            document.getElementById('rcon-success').style.display = 'block';
-                            document.getElementById('rcon-success').scrollIntoView({behavior: 'smooth'});
-                            // Vyprázdnění košíku po úspěšném dokončení
-                            emptyCart();
-                        } else {
+                        console.log("All operations executed successfully");
+                        showStatusMessage("All operations completed successfully", "success");
+                        const rconSuccess = document.getElementById('rcon-success');
+                        if (rconSuccess) {
+                            rconSuccess.innerHTML = '<strong>Operations completed successfully!</strong> <span style="display:inline-block;margin-left:10px">✅</span>';
+                            rconSuccess.style.display = 'block';
+                            rconSuccess.scrollIntoView({behavior: 'smooth'});
+                        }
+                        // Vyprázdnění košíku po úspěšném dokončení
+                        emptyCart();
+                    } else {
                         console.error(`Operations failed: ${data.message}`);
 
                         // Check if this is the "already executed" message
-                        if (data.alreadyExecuted || data.message.includes("already been executed")) {
-                            document.getElementById('rcon-success').innerHTML = '<strong>Operations already processed!</strong> <span style="display:inline-block;margin-left:10px">✅</span>';
-                            document.getElementById('rcon-success').style.display = 'block';
-                            document.getElementById('rcon-success').scrollIntoView({behavior: 'smooth'});
+                        if (data.alreadyExecuted || (data.message && data.message.includes("already been executed"))) {
+                            const rconSuccess = document.getElementById('rcon-success');
+                            if (rconSuccess) {
+                                rconSuccess.innerHTML = '<strong>Operations already processed!</strong> <span style="display:inline-block;margin-left:10px">✅</span>';
+                                rconSuccess.style.display = 'block';
+                                rconSuccess.scrollIntoView({behavior: 'smooth'});
+                            }
                         } else {
                             showStatusMessage("Failed to perform operations: " + data.message, "error");
-                            document.getElementById('rcon-error').innerHTML = '<strong>Error with activation:</strong> ' +
-                            '<pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
-                            data.message.replace(/commands/g, "operations").replace(/Commands/g, "Operations").replace(/command/g, "operation").replace(/Command/g, "Operation") + '</pre>' +
-                            '<br><button onclick="window.location.reload()" style="margin-top: 5px;">Try Again</button> or <a href="support.php">Contact Support</a>';
-                            document.getElementById('rcon-error').style.display = 'block';
-                            document.getElementById('rcon-error').scrollIntoView({behavior: 'smooth'});
+                            const rconError = document.getElementById('rcon-error');
+                            if (rconError) {
+                                rconError.innerHTML = '<strong>Error with activation:</strong> ' +
+                                    '<pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
+                                    (data.message ? data.message.replace(/commands/g, "operations").replace(/Commands/g, "Operations").replace(/command/g, "operation").replace(/Command/g, "Operation") : "Neznámá chyba") + '</pre>' +
+                                    '<br><button onclick="window.location.reload()" style="margin-top: 5px;">Try Again</button> or <a href="support.php">Contact Support</a>';
+                                rconError.style.display = 'block';
+                                rconError.scrollIntoView({behavior: 'smooth'});
+                            }
                         }
                     }
                 })
                 .catch(error => {
                     console.error("Error performing operations:", error);
                     showStatusMessage("Error connecting to server. Please try again later.", "error");
-                    document.getElementById('rcon-error').innerHTML = '<strong>Server connection issue:</strong> ' +
-                    '<pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
-                    error.message + '</pre>' +
-                    '<p>Don\'t worry, your purchase was recorded and operations can be performed later.</p>';
-                    document.getElementById('rcon-error').style.display = 'block';
-                    document.getElementById('rcon-error').scrollIntoView({behavior: 'smooth'});
+                    const rconError = document.getElementById('rcon-error');
+                    if (rconError) {
+                        rconError.innerHTML = '<strong>Server connection issue:</strong> ' +
+                            '<pre style="margin: 5px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd;">' +
+                            error.message + '</pre>' +
+                            '<p>Don\'t worry, your purchase was recorded and operations can be performed later.</p>';
+                        rconError.style.display = 'block';
+                        rconError.scrollIntoView({behavior: 'smooth'});
+                    }
                 });
             }
 

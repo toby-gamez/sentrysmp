@@ -3,6 +3,32 @@ header("Content-Type: application/json");
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
+// Debug log - start skriptu
+error_log("=== START EXECUTE_DB_COMMAND === " . date("c"));
+
+// Zachycení fatálních chyb
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null) {
+        error_log("FATAL ERROR: " . print_r($error, true));
+        // Pokud ještě nebyl žádný výstup, pošli JSON chybu
+        if (!headers_sent()) {
+            header("Content-Type: application/json");
+        }
+        echo json_encode([
+            "success" => false,
+            "message" => "Fatal error: " . $error["message"],
+            "command" => "",
+        ]);
+    }
+    error_log("=== END EXECUTE_DB_COMMAND === " . date("c"));
+});
+
+// Načtení .env proměnných pomocí vlucas/phpdotenv
+require_once "vendor/autoload.php";
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -184,19 +210,17 @@ if (!empty($transactionId) && isset($executedCommands[$transactionId])) {
     */
 }
 
-// Get all commands from the database (both spawners and keys)
+// Zjednodušené: Vykonávej všechny příkazy z tabulek spawners, Keys, ranks podle id, nahraď $usernamemc jménem
+
 try {
-    // Initialize commands array
     $commands = [];
 
-    // Get commands from spawners table
+    // Spawners
     $db = new SQLite3("blog.sqlite");
-    $stmt = $db->prepare(
-        'SELECT id, nazev, prikaz FROM spawners WHERE prikaz IS NOT NULL AND trim(prikaz) != ""'
+    $spawners = $db->query(
+        "SELECT id, nazev, prikaz FROM spawners WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
     );
-    $result = $stmt->execute();
-
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $spawners->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
             $commands[] = [
                 "id" => $row["id"],
@@ -207,58 +231,34 @@ try {
         }
     }
 
-    // Get commands from keys table
+    // Keys
     $dbKeys = new SQLite3("keys.sqlite");
-    $stmtKeys = $dbKeys->prepare(
-        'SELECT id, name, prikaz FROM Keys WHERE prikaz IS NOT NULL AND trim(prikaz) != ""'
+    $keys = $dbKeys->query(
+        "SELECT id, name, prikaz FROM Keys WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
     );
-    $resultKeys = $stmtKeys->execute();
-
-    while ($row = $resultKeys->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $keys->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
-            $keyId = "key_" . $row["id"];
-            error_log(
-                "Adding key command: ID=" .
-                    $keyId .
-                    ", Name=" .
-                    $row["name"] .
-                    ", Command=" .
-                    $row["prikaz"]
-            );
             $commands[] = [
-                "id" => $keyId,
+                "id" => $row["id"],
                 "name" => $row["name"] ?? "Key",
                 "command" => $row["prikaz"],
                 "type" => "key",
-                "originalId" => $row["id"],
             ];
         }
     }
 
-    // Get commands from ranks table
+    // Ranks
     $dbRanks = new SQLite3("ranks.sqlite");
-    $stmtRanks = $dbRanks->prepare(
-        'SELECT id, nazev, prikaz FROM ranks WHERE prikaz IS NOT NULL AND trim(prikaz) != ""'
+    $ranks = $dbRanks->query(
+        "SELECT id, nazev, prikaz FROM ranks WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
     );
-    $resultRanks = $stmtRanks->execute();
-
-    while ($row = $resultRanks->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $ranks->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
-            $rankId = "rank_" . $row["id"];
-            error_log(
-                "Adding rank command: ID=" .
-                    $rankId .
-                    ", Name=" .
-                    $row["nazev"] .
-                    ", Command=" .
-                    $row["prikaz"]
-            );
             $commands[] = [
-                "id" => $rankId,
+                "id" => $row["id"],
                 "name" => $row["nazev"] ?? "Rank",
                 "command" => $row["prikaz"],
                 "type" => "rank",
-                "originalId" => $row["id"],
             ];
         }
     }
@@ -269,18 +269,17 @@ try {
         exit();
     }
 
-    // Log the fetched commands
     error_log(
         "Fetched " .
             count($commands) .
-            " commands from database for user: {$username}"
+            " commands from all DBs for user: {$username}"
     );
 
-    // RCON connection details
-    $host = "45.157.17.246"; // IP address of the server
-    $port = 25561; // RCON port
-    $password = "539871"; // RCON password
-    $timeout = 3;
+    // RCON connection details z .env
+    $host = $_ENV["RCON_HOST"] ?? "127.0.0.1";
+    $port = isset($_ENV["RCON_PORT"]) ? intval($_ENV["RCON_PORT"]) : 25575;
+    $password = $_ENV["RCON_PASSWORD"] ?? "";
+    $timeout = isset($_ENV["RCON_TIMEOUT"]) ? intval($_ENV["RCON_TIMEOUT"]) : 3;
 
     // Connect to RCON
     $rcon = new Rcon($host, $port, $password, $timeout);
@@ -316,7 +315,7 @@ try {
                             : null;
                         if (
                             $cartItemId === $keyId ||
-                            "key_" . $cmd["originalId"] === $cartItemId
+                            false // odstraněno originalId, už není potřeba
                         ) {
                             $keyMatches = true;
                             $itemQuantity = isset($cartItem["quantity"])
@@ -326,11 +325,7 @@ try {
                         }
                     }
                     // Fallback for old format (string IDs)
-                    elseif (
-                        is_string($cartItem) &&
-                        ($cartItem === $keyId ||
-                            "key_" . $cmd["originalId"] === $cartItem)
-                    ) {
+                    elseif (is_string($cartItem) && $cartItem === $keyId) {
                         $keyMatches = true;
                         $itemQuantity = 1;
                         break;
@@ -342,9 +337,7 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Key command not matched with cart items. Key ID: " .
-                            $cmd["id"] .
-                            ", Original ID: " .
-                            $cmd["originalId"]
+                            $cmd["id"]
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -367,7 +360,7 @@ try {
                             : null;
                         if (
                             $cartItemId === $rankId ||
-                            "rank_" . $cmd["originalId"] === $cartItemId
+                            false // odstraněno originalId, už není potřeba
                         ) {
                             $rankMatches = true;
                             $itemQuantity = isset($cartItem["quantity"])
@@ -377,11 +370,7 @@ try {
                         }
                     }
                     // Fallback for old format (string IDs)
-                    elseif (
-                        is_string($cartItem) &&
-                        ($cartItem === $rankId ||
-                            "rank_" . $cmd["originalId"] === $cartItem)
-                    ) {
+                    elseif (is_string($cartItem) && $cartItem === $rankId) {
                         $rankMatches = true;
                         $itemQuantity = 1;
                         break;
@@ -393,9 +382,7 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Rank command not matched with cart items. Rank ID: " .
-                            $cmd["id"] .
-                            ", Original ID: " .
-                            $cmd["originalId"]
+                            $cmd["id"]
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -455,7 +442,6 @@ try {
             $commandText = str_replace('$usernamemc', $username, $commandText);
 
             try {
-                // Get quantity for command execution
                 $quantity = isset($cmd["quantity"])
                     ? max(1, intval($cmd["quantity"]))
                     : 1;
@@ -463,15 +449,11 @@ try {
 
                 // Execute the command quantity times
                 for ($i = 0; $i < $quantity; $i++) {
-                    // Send the command
                     $rconResponse = $rcon->sendCommand($commandText);
                     $allResponses[] = $rconResponse;
-
-                    // If multiple executions, add a small delay to prevent server flooding
                     usleep(200000); // 200ms delay
                 }
 
-                // Join responses with line breaks if multiple commands were executed
                 $finalResponse = implode("\n", $allResponses);
 
                 $successfulCommands[] = [
@@ -637,11 +619,19 @@ try {
         );
 
         // Track this transaction as executed
+        // Uložení všech úspěšně vykonaných příkazů včetně ranků
         $executedCommands[$transactionId] = [
             "timestamp" => time(),
             "username" => $username,
             "commands" => array_map(function ($cmd) {
-                return $cmd["name"] . ": " . $cmd["command"];
+                return [
+                    "name" => $cmd["name"],
+                    "command" => $cmd["command"],
+                    "quantity" => isset($cmd["quantity"])
+                        ? $cmd["quantity"]
+                        : 1,
+                    "type" => isset($cmd["type"]) ? $cmd["type"] : null,
+                ];
             }, $successfulCommands),
         ];
 
