@@ -80,164 +80,164 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize functionality
     setupCartProcessor();
   }
-});
 
-function setupCartProcessor() {
-  const processButton = document.getElementById("process-cart");
-  const executeButton = document.getElementById("execute-commands");
+  function setupCartProcessor() {
+    const processButton = document.getElementById("process-cart");
+    const executeButton = document.getElementById("execute-commands");
 
-  if (processButton) {
-    processButton.addEventListener("click", processCart);
+    if (processButton) {
+      processButton.addEventListener("click", processCart);
+    }
+
+    if (executeButton) {
+      executeButton.addEventListener("click", executeCommands);
+    }
   }
 
-  if (executeButton) {
-    executeButton.addEventListener("click", executeCommands);
-  }
-}
+  function processCart() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
 
-function processCart() {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  if (cart.length === 0) {
-    alert("Your cart is empty!");
-    return;
-  }
+    // Initialize variables to store combined results
+    let totalPrice = 0;
+    const commands = [];
+    const username = getUsernameFromStorage();
 
-  // Initialize variables to store combined results
-  let totalPrice = 0;
-  const commands = [];
-  const username = getUsernameFromStorage();
+    // Process spawners first
+    processSpawners()
+      .then((spawnerResults) => {
+        // Add spawner results
+        totalPrice += spawnerResults.price;
+        commands.push(...spawnerResults.commands);
 
-  // Process spawners first
-  processSpawners()
-    .then((spawnerResults) => {
-      // Add spawner results
-      totalPrice += spawnerResults.price;
-      commands.push(...spawnerResults.commands);
+        // Then process keys
+        return processKeys();
+      })
+      .then((keyResults) => {
+        // Add key results
+        totalPrice += keyResults.price;
+        commands.push(...keyResults.commands);
 
-      // Then process keys
-      return processKeys();
-    })
-    .then((keyResults) => {
-      // Add key results
-      totalPrice += keyResults.price;
-      commands.push(...keyResults.commands);
+        // Then process ranks
+        return processRanks();
+      })
+      .then((rankResults) => {
+        // Add rank results
+        totalPrice += rankResults.price;
+        commands.push(...rankResults.items);
 
-      // Then process ranks
-      return processRanks();
-    })
-    .then((rankResults) => {
-      // Add rank results
-      totalPrice += rankResults.price;
-      commands.push(...rankResults.items);
+        // Display total price
+        const priceSummary = document.getElementById("price-summary");
+        priceSummary.innerHTML = `<strong>Total Price:</strong> ${totalPrice}€`;
 
-      // Display total price
-      const priceSummary = document.getElementById("price-summary");
-      priceSummary.innerHTML = `<strong>Total Price:</strong> ${totalPrice}€`;
+        // Store IDs to fetch commands
+        localStorage.setItem("processingCart", JSON.stringify(commands));
 
-      // Store IDs to fetch commands
-      localStorage.setItem("processingCart", JSON.stringify(commands));
-
-      // Fetch the commands
-      fetchCommands(commands, username);
-    })
-    .catch((error) => {
-      console.error("Error processing cart:", error);
-      alert("Error processing cart. Please try again later.");
-    });
-
-  function processSpawners() {
-    return fetch("spawners.php")
-      .then((response) => response.text())
-      .then((html) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const spawners = doc.querySelectorAll(".spawner");
-
-        let price = 0;
-        const cmds = [];
-
-        // Process each spawner in the cart
-        spawners.forEach((spawner) => {
-          const id = String(spawner.getAttribute("data-id"));
-          // Accept both plain id and spawner_ prefix
-          const inCart = cart.some(
-            (item) =>
-              String(item) === id ||
-              String(item) === `spawner_${id}` ||
-              (typeof item === "object" &&
-                (String(item.id) === id || String(item.id) === `spawner_${id}`))
-          );
-          if (inCart) {
-            // Get price from description
-            const description = spawner.querySelector("p").textContent;
-            const priceMatch = description.match(/(\d+)€/);
-
-            if (priceMatch) {
-              price += parseInt(priceMatch[1]);
-            }
-
-            // Find the command associated with this spawner
-            const spawnerName = spawner.querySelector("h2").textContent;
-
-            cmds.push({
-              id: id,
-              name: spawnerName,
-              type: "spawner",
-            });
-          }
-        });
-
-        return { price: price, commands: cmds };
+        // Fetch the commands
+        fetchCommands(commands, username);
+      })
+      .catch((error) => {
+        console.error("Error processing cart:", error);
+        alert("Error processing cart. Please try again later.");
       });
-  }
 
-  function processKeys() {
-    return fetch("keys.php")
-      .then((response) => response.text())
-      .then((html) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const keys = doc.querySelectorAll(".spawner");
+    function processSpawners() {
+      return fetch("shards.php")
+        .then((response) => response.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          const spawners = doc.querySelectorAll(".spawner");
 
-        let price = 0;
-        const cmds = [];
+          let price = 0;
+          const cmds = [];
 
-        // Process each key in the cart
-        keys.forEach((key) => {
-          const id = String(key.getAttribute("data-id"));
-          // Accept both plain id and key_ prefix
-          const inCart = cart.some(
-            (item) =>
-              String(item) === id ||
-              String(item) === `key_${id}` ||
-              (typeof item === "object" &&
-                (String(item.id) === id || String(item.id) === `key_${id}`))
-          );
-          if (inCart) {
-            // Get price from description
-            const description = key.querySelector("p").textContent;
-            const priceMatch = description.match(/(\d+)€/);
+          // Process each spawner in the cart
+          spawners.forEach((spawner) => {
+            const id = String(spawner.getAttribute("data-id"));
+            // Accept both plain id and spawner_ prefix
+            const inCart = cart.some(
+              (item) =>
+                String(item) === id ||
+                String(item) === `spawner_${id}` ||
+                (typeof item === "object" &&
+                  (String(item.id) === id ||
+                    String(item.id) === `spawner_${id}`)),
+            );
+            if (inCart) {
+              // Get price from description
+              const description = spawner.querySelector("p").textContent;
+              const priceMatch = description.match(/(\d+)€/);
 
-            if (priceMatch) {
-              price += parseInt(priceMatch[1]);
+              if (priceMatch) {
+                price += parseInt(priceMatch[1]);
+              }
+
+              // Find the command associated with this spawner
+              const spawnerName = spawner.querySelector("h2").textContent;
+
+              cmds.push({
+                id: id,
+                name: spawnerName,
+                type: "spawner",
+              });
             }
+          });
 
-            // Find the command associated with this key
-            const keyName = key.querySelector("h2").textContent;
-
-            cmds.push({
-              id: id,
-              name: keyName,
-              type: "key",
-            });
-          }
+          return { price: price, commands: cmds };
         });
+    }
 
-        return { price: price, commands: cmds };
-      });
-  }
+    function processKeys() {
+      return fetch("keys.php")
+        .then((response) => response.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          const keys = doc.querySelectorAll(".spawner");
 
-  function processRanks() {
+          let price = 0;
+          const cmds = [];
+
+          // Process each key in the cart
+          keys.forEach((key) => {
+            const id = String(key.getAttribute("data-id"));
+            // Accept both plain id and key_ prefix
+            const inCart = cart.some(
+              (item) =>
+                String(item) === id ||
+                String(item) === `key_${id}` ||
+                (typeof item === "object" &&
+                  (String(item.id) === id || String(item.id) === `key_${id}`)),
+            );
+            if (inCart) {
+              // Get price from description
+              const description = key.querySelector("p").textContent;
+              const priceMatch = description.match(/(\d+)€/);
+
+              if (priceMatch) {
+                price += parseInt(priceMatch[1]);
+              }
+
+              // Find the command associated with this key
+              const keyName = key.querySelector("h2").textContent;
+
+              cmds.push({
+                id: id,
+                name: keyName,
+                type: "key",
+              });
+            }
+          });
+
+          return { price: price, commands: cmds };
+        });
+    }
+
+    function processRanks() {
       return fetch("ranks.php")
         .then((response) => response.text())
         .then((html) => {
@@ -266,17 +266,13 @@ function processCart() {
               // New cart format (array of objects)
               const cartItem = newCart.find(
                 (item) =>
-                  String(item.id) === id ||
-                  String(item.id) === `rank_${id}`
+                  String(item.id) === id || String(item.id) === `rank_${id}`,
               );
               if (cartItem) {
                 inCart = true;
                 quantity = cartItem.quantity || 1;
               }
-            } else if (
-              cart.includes(id) ||
-              cart.includes(`rank_${id}`)
-            ) {
+            } else if (cart.includes(id) || cart.includes(`rank_${id}`)) {
               // Old cart format (array of ids)
               inCart = true;
             }
@@ -290,7 +286,8 @@ function processCart() {
                 const discountedPrice =
                   priceContainer.querySelector(".discounted-price");
                 if (discountedPrice) {
-                  const priceMatch = discountedPrice.textContent.match(/(\d+(?:\.\d+)?)€/);
+                  const priceMatch =
+                    discountedPrice.textContent.match(/(\d+(?:\.\d+)?)€/);
                   if (priceMatch) {
                     rankPrice = parseFloat(priceMatch[1]);
                   }
@@ -326,370 +323,382 @@ function processCart() {
         });
     }
 
-function fetchCommands(itemInfo, username) {
-  // We'll need to fetch commands for all item types
-  const spawnerItems = itemInfo.filter(
-    (item) => !item.id.toString().startsWith("key_") && item.type !== "rank",
-  );
-  const keyItems = itemInfo.filter((item) =>
-    item.id.toString().startsWith("key_"),
-  );
-  const rankItems = itemInfo.filter((item) => item.type === "rank");
+    function fetchCommands(itemInfo, username) {
+      // We'll need to fetch commands for all item types
+      const spawnerItems = itemInfo.filter(
+        (item) =>
+          !item.id.toString().startsWith("key_") && item.type !== "rank",
+      );
+      const keyItems = itemInfo.filter((item) =>
+        item.id.toString().startsWith("key_"),
+      );
+      const rankItems = itemInfo.filter((item) => item.type === "rank");
 
-  const allCommands = [];
+      const allCommands = [];
 
-  // First fetch spawner commands
-  fetchSpawnerCommands()
-    .then((spawnerCommands) => {
-      // Add spawner commands
-      allCommands.push(...spawnerCommands);
+      // First fetch spawner commands
+      fetchSpawnerCommands()
+        .then((spawnerCommands) => {
+          // Add spawner commands
+          allCommands.push(...spawnerCommands);
 
-      // Then fetch key commands
-      return fetchKeyCommands();
-    })
-    .then((keyCommands) => {
-      // Add key commands
-      allCommands.push(...keyCommands);
+          // Then fetch key commands
+          return fetchKeyCommands();
+        })
+        .then((keyCommands) => {
+          // Add key commands
+          allCommands.push(...keyCommands);
 
-      // Then fetch rank commands
-      return fetchRankCommands();
-    })
-    .then((rankCommands) => {
-      // Add rank commands
-      allCommands.push(...rankCommands);
+          // Then fetch rank commands
+          return fetchRankCommands();
+        })
+        .then((rankCommands) => {
+          // Add rank commands
+          allCommands.push(...rankCommands);
 
-      // Display all commands
-      showCommands(allCommands);
+          // Display all commands
+          showCommands(allCommands);
 
-      // Store commands for execution
-      localStorage.setItem("commandsToExecute", JSON.stringify(allCommands));
-    })
-    .catch((error) => {
-      console.error("Error fetching commands:", error);
-    });
+          // Store commands for execution
+          localStorage.setItem(
+            "commandsToExecute",
+            JSON.stringify(allCommands),
+          );
+        })
+        .catch((error) => {
+          console.error("Error fetching commands:", error);
+        });
+    }
 
-  function fetchSpawnerCommands() {
-    return new Promise((resolve, reject) => {
-      if (spawnerItems.length === 0) {
-        resolve([]);
-        return;
-      }
-
-      // Create a hidden iframe to load edit_spawners.php content
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = "edit_spawners.php";
-
-      iframe.onload = function () {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          const spawnerForms = doc.querySelectorAll(".spaw form");
-          const commands = [];
-
-          spawnerItems.forEach((info) => {
-            spawnerForms.forEach((form) => {
-              const idInput = form.querySelector('input[name="id"]');
-              if (idInput && parseInt(idInput.value) === parseInt(info.id)) {
-                let command = form.querySelector('input[name="prikaz"]').value;
-
-                // Remove leading slash if present
-                if (command.startsWith("/")) {
-                  command = command.substring(1);
-                }
-
-                // Replace $usernamemc with actual username
-                if (username) {
-                  command = command.replace(/\$usernamemc/g, username);
-                }
-
-                commands.push({
-                  name: info.name,
-                  command: command,
-                  type: "spawner",
-                });
-              }
-            });
-          });
-
-          // Clean up
-          document.body.removeChild(iframe);
-          resolve(commands);
-        } catch (error) {
-          console.error("Error fetching spawner commands:", error);
-          document.body.removeChild(iframe);
-          reject(error);
+    function fetchSpawnerCommands() {
+      return new Promise((resolve, reject) => {
+        if (spawnerItems.length === 0) {
+          resolve([]);
+          return;
         }
-      };
 
-      document.body.appendChild(iframe);
-    });
-  }
+        // Create a hidden iframe to load edit_spawners.php content
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "edit_shards.php";
 
-  function fetchKeyCommands() {
-    return new Promise((resolve, reject) => {
-      if (keyItems.length === 0) {
-        resolve([]);
-        return;
-      }
+        iframe.onload = function () {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const spawnerForms = doc.querySelectorAll(".spaw form");
+            const commands = [];
 
-      // Create a hidden iframe to load edit_keys.php content
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = "edit_keys.php";
+            spawnerItems.forEach((info) => {
+              spawnerForms.forEach((form) => {
+                const idInput = form.querySelector('input[name="id"]');
+                if (idInput && parseInt(idInput.value) === parseInt(info.id)) {
+                  let command = form.querySelector(
+                    'input[name="prikaz"]',
+                  ).value;
 
-      iframe.onload = function () {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          const keyForms = doc.querySelectorAll(".edit-key form");
-          const commands = [];
+                  // Remove leading slash if present
+                  if (command.startsWith("/")) {
+                    command = command.substring(1);
+                  }
 
-          keyItems.forEach((info) => {
-            // Extract numeric ID from key ID (remove "key_" prefix)
-            const numericId = info.id.toString().replace("key_", "");
+                  // Replace $usernamemc with actual username
+                  if (username) {
+                    command = command.replace(/\$usernamemc/g, username);
+                  }
 
-            keyForms.forEach((form) => {
-              const idInput = form.querySelector('input[name="id"]');
-              if (idInput && idInput.value === numericId) {
-                let command = form.querySelector('input[name="prikaz"]').value;
-
-                // Remove leading slash if present
-                if (command.startsWith("/")) {
-                  command = command.substring(1);
-                }
-
-                // Replace $usernamemc with actual username
-                if (username) {
-                  command = command.replace(/\$usernamemc/g, username);
-                }
-
-                commands.push({
-                  name: info.name + " (Key)",
-                  command: command,
-                  type: "key",
-                  keyId: parseInt(numericId),
-                });
-              }
-            });
-          });
-
-          // Clean up
-          document.body.removeChild(iframe);
-          resolve(commands);
-        } catch (error) {
-          console.error("Error fetching key commands:", error);
-          document.body.removeChild(iframe);
-          reject(error);
-        }
-      };
-
-      document.body.appendChild(iframe);
-    });
-  }
-
-  function fetchRankCommands() {
-    return new Promise((resolve, reject) => {
-      if (rankItems.length === 0) {
-        resolve([]);
-        return;
-      }
-
-      // Create a hidden iframe to load edit_ranks.php content
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = "edit_ranks.php";
-
-      iframe.onload = function () {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          const rankForms = doc.querySelectorAll(".spaw form");
-          const commands = [];
-
-          rankItems.forEach((info) => {
-            rankForms.forEach((form) => {
-              const idInput = form.querySelector('input[name="id"]');
-              if (idInput && parseInt(idInput.value) === parseInt(info.id)) {
-                let command = form.querySelector('input[name="prikaz"]').value;
-
-                // Remove leading slash if present
-                if (command.startsWith("/")) {
-                  command = command.substring(1);
-                }
-
-                // Replace $usernamemc with actual username
-                if (username) {
-                  command = command.replace(/\$usernamemc/g, username);
-                }
-
-                // Calculate quantity
-                const quantity = info.quantity || 1;
-
-                // Push the command once for each quantity
-                for (let i = 0; i < quantity; i++) {
                   commands.push({
-                    name: info.name + " (Rank)",
+                    name: info.name,
                     command: command,
-                    type: "rank",
-                    rankId: parseInt(info.id),
+                    type: "spawner",
                   });
                 }
-              }
+              });
             });
-          });
 
-          // Clean up
-          document.body.removeChild(iframe);
-          resolve(commands);
-        } catch (error) {
-          console.error("Error fetching rank commands:", error);
-          document.body.removeChild(iframe);
-          reject(error);
+            // Clean up
+            document.body.removeChild(iframe);
+            resolve(commands);
+          } catch (error) {
+            console.error("Error fetching spawner commands:", error);
+            document.body.removeChild(iframe);
+            reject(error);
+          }
+        };
+
+        document.body.appendChild(iframe);
+      });
+    }
+
+    function fetchKeyCommands() {
+      return new Promise((resolve, reject) => {
+        if (keyItems.length === 0) {
+          resolve([]);
+          return;
         }
-      };
 
-      document.body.appendChild(iframe);
+        // Create a hidden iframe to load edit_keys.php content
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "edit_keys.php";
+
+        iframe.onload = function () {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const keyForms = doc.querySelectorAll(".edit-key form");
+            const commands = [];
+
+            keyItems.forEach((info) => {
+              // Extract numeric ID from key ID (remove "key_" prefix)
+              const numericId = info.id.toString().replace("key_", "");
+
+              keyForms.forEach((form) => {
+                const idInput = form.querySelector('input[name="id"]');
+                if (idInput && idInput.value === numericId) {
+                  let command = form.querySelector(
+                    'input[name="prikaz"]',
+                  ).value;
+
+                  // Remove leading slash if present
+                  if (command.startsWith("/")) {
+                    command = command.substring(1);
+                  }
+
+                  // Replace $usernamemc with actual username
+                  if (username) {
+                    command = command.replace(/\$usernamemc/g, username);
+                  }
+
+                  commands.push({
+                    name: info.name + " (Key)",
+                    command: command,
+                    type: "key",
+                    keyId: parseInt(numericId),
+                  });
+                }
+              });
+            });
+
+            // Clean up
+            document.body.removeChild(iframe);
+            resolve(commands);
+          } catch (error) {
+            console.error("Error fetching key commands:", error);
+            document.body.removeChild(iframe);
+            reject(error);
+          }
+        };
+
+        document.body.appendChild(iframe);
+      });
+    }
+
+    function fetchRankCommands() {
+      return new Promise((resolve, reject) => {
+        if (rankItems.length === 0) {
+          resolve([]);
+          return;
+        }
+
+        // Create a hidden iframe to load edit_ranks.php content
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "edit_ranks.php";
+
+        iframe.onload = function () {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const rankForms = doc.querySelectorAll(".spaw form");
+            const commands = [];
+
+            rankItems.forEach((info) => {
+              rankForms.forEach((form) => {
+                const idInput = form.querySelector('input[name="id"]');
+                if (idInput && parseInt(idInput.value) === parseInt(info.id)) {
+                  let command = form.querySelector(
+                    'input[name="prikaz"]',
+                  ).value;
+
+                  // Remove leading slash if present
+                  if (command.startsWith("/")) {
+                    command = command.substring(1);
+                  }
+
+                  // Replace $usernamemc with actual username
+                  if (username) {
+                    command = command.replace(/\$usernamemc/g, username);
+                  }
+
+                  // Calculate quantity
+                  const quantity = info.quantity || 1;
+
+                  // Push the command once for each quantity
+                  for (let i = 0; i < quantity; i++) {
+                    commands.push({
+                      name: info.name + " (Rank)",
+                      command: command,
+                      type: "rank",
+                      rankId: parseInt(info.id),
+                    });
+                  }
+                }
+              });
+            });
+
+            // Clean up
+            document.body.removeChild(iframe);
+            resolve(commands);
+          } catch (error) {
+            console.error("Error fetching rank commands:", error);
+            document.body.removeChild(iframe);
+            reject(error);
+          }
+        };
+
+        document.body.appendChild(iframe);
+      });
+    }
+  }
+
+  function showCommands(commands) {
+    const commandSummary = document.getElementById("command-summary");
+    commandSummary.innerHTML = "";
+
+    if (commands.length === 0) {
+      commandSummary.textContent = "No commands found.";
+      return;
+    }
+
+    commands.forEach((cmd) => {
+      const cmdDiv = document.createElement("div");
+      cmdDiv.className = "command-item";
+      cmdDiv.innerHTML = `<strong>${cmd.name}:</strong> <code>${cmd.command}</code>`;
+      commandSummary.appendChild(cmdDiv);
     });
   }
-}
 
-function showCommands(commands) {
-  const commandSummary = document.getElementById("command-summary");
-  commandSummary.innerHTML = "";
+  function executeCommands() {
+    const commandsStr = localStorage.getItem("commandsToExecute");
+    if (!commandsStr) {
+      alert("No commands to execute. Please process your cart first.");
+      return;
+    }
 
-  if (commands.length === 0) {
-    commandSummary.textContent = "No commands found.";
-    return;
+    const commands = JSON.parse(commandsStr);
+    const username = getUsernameFromStorage();
+
+    if (!username) {
+      alert("Please log in with your Minecraft username first.");
+      return;
+    }
+
+    // Create a confirmation dialog
+    if (
+      confirm(
+        `Execute ${commands.length} command(s) on the Minecraft server for ${username}?`,
+      )
+    ) {
+      // Show loading state
+      const executeBtn = document.getElementById("execute-commands");
+      const originalText = executeBtn.textContent;
+      executeBtn.textContent = "Executing...";
+      executeBtn.disabled = true;
+
+      // Execute commands one by one
+      executeCommandSequence(commands, 0, username, executeBtn, originalText);
+    }
   }
 
-  commands.forEach((cmd) => {
-    const cmdDiv = document.createElement("div");
-    cmdDiv.className = "command-item";
-    cmdDiv.innerHTML = `<strong>${cmd.name}:</strong> <code>${cmd.command}</code>`;
-    commandSummary.appendChild(cmdDiv);
-  });
-}
-
-function executeCommands() {
-  const commandsStr = localStorage.getItem("commandsToExecute");
-  if (!commandsStr) {
-    alert("No commands to execute. Please process your cart first.");
-    return;
-  }
-
-  const commands = JSON.parse(commandsStr);
-  const username = getUsernameFromStorage();
-
-  if (!username) {
-    alert("Please log in with your Minecraft username first.");
-    return;
-  }
-
-  // Create a confirmation dialog
-  if (
-    confirm(
-      `Execute ${commands.length} command(s) on the Minecraft server for ${username}?`,
-    )
+  function executeCommandSequence(
+    commands,
+    index,
+    username,
+    button,
+    originalText,
   ) {
-    // Show loading state
-    const executeBtn = document.getElementById("execute-commands");
-    const originalText = executeBtn.textContent;
-    executeBtn.textContent = "Executing...";
-    executeBtn.disabled = true;
+    if (index >= commands.length) {
+      // All commands executed
+      button.textContent = originalText;
+      button.disabled = false;
+      alert("All commands executed successfully!");
+      return;
+    }
 
-    // Execute commands one by one
-    executeCommandSequence(commands, 0, username, executeBtn, originalText);
-  }
-}
+    const command = commands[index].command;
+    const isKeyCommand = commands[index].type === "key";
+    const keyId = commands[index].keyId;
 
-function executeCommandSequence(
-  commands,
-  index,
-  username,
-  button,
-  originalText,
-) {
-  if (index >= commands.length) {
-    // All commands executed
-    button.textContent = originalText;
-    button.disabled = false;
-    alert("All commands executed successfully!");
-    return;
-  }
+    // Prepare request body based on command type
+    let requestBody;
 
-  const command = commands[index].command;
-  const isKeyCommand = commands[index].type === "key";
-  const keyId = commands[index].keyId;
+    if (isKeyCommand) {
+      requestBody = {
+        username: username,
+        key: true,
+        keyId: keyId,
+      };
+    } else {
+      requestBody = {
+        username: username,
+        command: command,
+      };
+    }
 
-  // Prepare request body based on command type
-  let requestBody;
-
-  if (isKeyCommand) {
-    requestBody = {
-      username: username,
-      key: true,
-      keyId: keyId,
-    };
-  } else {
-    requestBody = {
-      username: username,
-      command: command,
-    };
-  }
-
-  // Send RCON command
-  fetch("cart-rcon.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(
-        `Command executed: ${command} (${isKeyCommand ? "key" : "spawner"})`,
-      );
-      console.log("Response:", data);
-
-      // Update command status in the UI
-      const commandItems = document.querySelectorAll(".command-item");
-      if (commandItems[index]) {
-        commandItems[index].innerHTML +=
-          `<span class="status success"> ✓ Executed</span>`;
-      }
-
-      // Execute next command with a small delay
-      setTimeout(() => {
-        executeCommandSequence(
-          commands,
-          index + 1,
-          username,
-          button,
-          originalText,
-        );
-      }, 500);
+    // Send RCON command
+    fetch("cart-rcon.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     })
-    .catch((error) => {
-      console.error("Error executing command:", error);
-
-      // Update command status in the UI
-      const commandItems = document.querySelectorAll(".command-item");
-      if (commandItems[index]) {
-        commandItems[index].innerHTML +=
-          `<span class="status error"> ✗ Failed</span>`;
-      }
-
-      // Continue with next command
-      setTimeout(() => {
-        executeCommandSequence(
-          commands,
-          index + 1,
-          username,
-          button,
-          originalText,
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(
+          `Command executed: ${command} (${isKeyCommand ? "key" : "spawner"})`,
         );
-      }, 500);
-    });
-}
+        console.log("Response:", data);
+
+        // Update command status in the UI
+        const commandItems = document.querySelectorAll(".command-item");
+        if (commandItems[index]) {
+          commandItems[index].innerHTML +=
+            `<span class="status success"> ✓ Executed</span>`;
+        }
+
+        // Execute next command with a small delay
+        setTimeout(() => {
+          executeCommandSequence(
+            commands,
+            index + 1,
+            username,
+            button,
+            originalText,
+          );
+        }, 500);
+      })
+      .catch((error) => {
+        console.error("Error executing command:", error);
+
+        // Update command status in the UI
+        const commandItems = document.querySelectorAll(".command-item");
+        if (commandItems[index]) {
+          commandItems[index].innerHTML +=
+            `<span class="status error"> ✗ Failed</span>`;
+        }
+
+        // Continue with next command
+        setTimeout(() => {
+          executeCommandSequence(
+            commands,
+            index + 1,
+            username,
+            button,
+            originalText,
+          );
+        }, 500);
+      });
+  }
+});
 
 function getUsernameFromStorage() {
   const username = localStorage.getItem("minecraft-username");

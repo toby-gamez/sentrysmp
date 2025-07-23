@@ -1,5 +1,5 @@
 // cart-handler.js - Comprehensive cart handler with discount support
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
   console.log("Cart handler loaded");
 
   // Initialize cart from localStorage
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Check for the problematic format - cart:"[...]";
       if (cartData.startsWith('cart:"') && cartData.endsWith('";')) {
         // Fix the format
-        const fixedData = cartData.replace(/^cart:"/, '').replace(/";$/, '');
+        const fixedData = cartData.replace(/^cart:"/, "").replace(/";$/, "");
         localStorage.setItem("cart", fixedData);
         cart = JSON.parse(fixedData);
       } else {
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Verify the items follow the expected format (support for both old and new formats)
     if (cart.length > 0) {
-      if (typeof cart[0] === 'object') {
+      if (typeof cart[0] === "object") {
         // This is the new format with price, discounts, etc.
         console.log("Cart is using object format");
       } else {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             quantity: 1,
             price: 0,
             originalPrice: 0,
-            discountPercent: 0
+            discountPercent: 0,
           });
         });
         cart = newCart;
@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save properly formatted cart back to localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
-
   } catch (error) {
     console.error("Error loading cart from localStorage:", error);
     cart = [];
@@ -57,23 +56,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Main cart functions
   window.cartHandler = {
-    getCart: function() {
+    getCart: function () {
       return cart;
     },
 
-    saveCart: function() {
+    saveCart: function () {
       localStorage.setItem("cart", JSON.stringify(cart));
     },
 
-    addToCart: function(item) {
+    addToCart: function (item) {
       // Check if item is already in cart
-      const itemIndex = cart.findIndex(cartItem =>
-        typeof cartItem === 'object' ? cartItem.id === item.id : cartItem === item.id
+      const itemIndex = cart.findIndex((cartItem) =>
+        typeof cartItem === "object"
+          ? cartItem.id === item.id
+          : cartItem === item.id,
       );
 
       if (itemIndex !== -1) {
         // If item exists, increase quantity
-        if (typeof cart[itemIndex] === 'object') {
+        if (typeof cart[itemIndex] === "object") {
           cart[itemIndex].quantity += item.quantity || 1;
         } else {
           // Replace old format with new format
@@ -82,19 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
             quantity: item.quantity || 1,
             price: item.price || 0,
             originalPrice: item.originalPrice || 0,
-            discountPercent: item.discountPercent || 0
+            discountPercent: item.discountPercent || 0,
           };
         }
       } else {
         // Add new item
-        if (typeof item === 'object') {
+        if (typeof item === "object") {
           // Ensure all required properties exist
           const newItem = {
             id: item.id,
             quantity: item.quantity || 1,
             price: item.price || 0,
             originalPrice: item.originalPrice || 0,
-            discountPercent: item.discountPercent || 0
+            discountPercent: item.discountPercent || 0,
           };
           cart.push(newItem);
         } else {
@@ -104,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
             quantity: 1,
             price: 0,
             originalPrice: 0,
-            discountPercent: 0
+            discountPercent: 0,
           });
         }
       }
@@ -116,13 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
       return cart;
     },
 
-    updateItemQuantity: function(itemId, change) {
-      const itemIndex = cart.findIndex(item =>
-        typeof item === 'object' ? item.id === itemId : item === itemId
+    updateItemQuantity: function (itemId, change) {
+      const itemIndex = cart.findIndex((item) =>
+        typeof item === "object" ? item.id === itemId : item === itemId,
       );
 
       if (itemIndex !== -1) {
-        if (typeof cart[itemIndex] === 'object') {
+        if (typeof cart[itemIndex] === "object") {
           cart[itemIndex].quantity += change;
 
           // Remove item if quantity is 0 or less
@@ -141,12 +142,14 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    removeFromCart: function(itemId) {
+    removeFromCart: function (itemId) {
       // Convert itemId to string for consistent comparison
       const idString = String(itemId);
 
-      cart = cart.filter(item =>
-        typeof item === 'object' ? String(item.id) !== idString : String(item) !== idString
+      cart = cart.filter((item) =>
+        typeof item === "object"
+          ? String(item.id) !== idString
+          : String(item) !== idString,
       );
 
       this.saveCart();
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
       this.showNotification("Item removed from cart!", "success");
     },
 
-    emptyCart: function() {
+    emptyCart: function () {
       if (cart.length === 0) {
         this.showNotification("Cart is already empty!", "info");
         return;
@@ -170,11 +173,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    calculateTotal: function() {
+    calculateTotal: function () {
       let total = 0;
 
-      cart.forEach(item => {
-        if (typeof item === 'object') {
+      cart.forEach((item) => {
+        if (typeof item === "object") {
           total += (item.price || 0) * (item.quantity || 1);
         }
       });
@@ -182,12 +185,12 @@ document.addEventListener('DOMContentLoaded', function() {
       return total;
     },
 
-    updateCartTotal: function() {
+    updateCartTotal: function () {
       const total = this.calculateTotal();
-      const formattedTotal = new Intl.NumberFormat('cs-CZ', {
-        style: 'currency',
-        currency: 'CZK',
-        minimumFractionDigits: 0
+      const formattedTotal = new Intl.NumberFormat("cs-CZ", {
+        style: "currency",
+        currency: "CZK",
+        minimumFractionDigits: 0,
       }).format(total);
 
       // Find or create the total element
@@ -204,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
       totalElement.innerHTML = `<h3>Total: ${formattedTotal}</h3>`;
     },
 
-    updateCheckoutButtonVisibility: function() {
+    updateCheckoutButtonVisibility: function () {
       const checkoutButton = document.querySelector(".checkout-btn");
       const emptyButton = document.querySelector(".empty-btn");
 
@@ -227,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    renderCartItem: function(item, data) {
+    renderCartItem: function (item, data) {
       const itemElement = document.createElement("div");
       itemElement.className = "item-card";
       itemElement.dataset.id = item.id;
@@ -243,15 +246,15 @@ document.addEventListener('DOMContentLoaded', function() {
         itemPrice = item.price || data.price || 0;
       } else {
         // Default values if no data provided
-        if (String(item.id).startsWith('key_')) {
-          itemName = `Key #${String(item.id).replace('key_', '')}`;
+        if (String(item.id).startsWith("key_")) {
+          itemName = `Key #${String(item.id).replace("key_", "")}`;
         } else {
           itemName = `Item #${item.id}`;
         }
       }
 
       // Create HTML structure for the item card
-      let priceDisplay = '';
+      let priceDisplay = "";
 
       if (item.originalPrice && item.originalPrice > item.price) {
         // Item has a discount
@@ -285,8 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
 
       // Image display if available
-      const imageDisplay = itemImage ?
-        `<img src="${itemImage}" alt="${itemName}" class="item-image">` : '';
+      const imageDisplay = itemImage
+        ? `<img src="${itemImage}" alt="${itemName}" class="item-image">`
+        : "";
 
       // Assemble the complete item card
       itemElement.innerHTML = `
@@ -300,27 +304,28 @@ document.addEventListener('DOMContentLoaded', function() {
       return itemElement;
     },
 
-    fetchSpawners: function() {
-      return fetch("spawners.php")
-        .then(response => response.text())
-        .then(html => {
+    fetchSpawners: function () {
+      return fetch("shards.php")
+        .then((response) => response.text())
+        .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, "text/html");
           const allSpawners = doc.querySelectorAll(".spawner");
 
           // Process spawners from cart
-          const cartSpawners = cart.filter(item => {
-            const id = typeof item === 'object' ? item.id : item;
-            return !String(id).startsWith('key_');
+          const cartSpawners = cart.filter((item) => {
+            const id = typeof item === "object" ? item.id : item;
+            return !String(id).startsWith("key_");
           });
 
           // Map to collect spawner data
           const spawnerData = {};
 
           // Extract data from all spawners
-          allSpawners.forEach(spawner => {
+          allSpawners.forEach((spawner) => {
             const id = spawner.getAttribute("data-id");
-            const name = spawner.querySelector("h3")?.textContent || `Spawner #${id}`;
+            const name =
+              spawner.querySelector("h3")?.textContent || `Spawner #${id}`;
             const image = spawner.querySelector("img")?.src || "";
             const priceElement = spawner.querySelector(".price");
             let price = 0;
@@ -340,51 +345,55 @@ document.addEventListener('DOMContentLoaded', function() {
           const cartList = document.getElementById("cart-list");
           if (!cartList) return;
 
-          cartSpawners.forEach(item => {
-            const id = typeof item === 'object' ? item.id : item;
+          cartSpawners.forEach((item) => {
+            const id = typeof item === "object" ? item.id : item;
             const data = spawnerData[id];
 
             if (data) {
               // Update price info if not already set
-              if (typeof item === 'object' && item.price === 0) {
+              if (typeof item === "object" && item.price === 0) {
                 item.price = data.price;
               }
 
               // Create and add item to cart display
               const itemElement = this.renderCartItem(
-                typeof item === 'object' ? item : { id, quantity: 1, price: data.price },
-                data
+                typeof item === "object"
+                  ? item
+                  : { id, quantity: 1, price: data.price },
+                data,
               );
               cartList.appendChild(itemElement);
             }
           });
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error fetching spawners:", error);
         });
     },
 
-    fetchKeys: function() {
+    fetchKeys: function () {
       return fetch("keys.php")
-        .then(response => response.text())
-        .then(html => {
+        .then((response) => response.text())
+        .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, "text/html");
           const allKeys = doc.querySelectorAll(".spawner");
 
           // Process keys from cart
-          const cartKeys = cart.filter(item => {
-            const id = typeof item === 'object' ? item.id : item;
-            return String(id).startsWith('key_');
+          const cartKeys = cart.filter((item) => {
+            const id = typeof item === "object" ? item.id : item;
+            return String(id).startsWith("key_");
           });
 
           // Map to collect key data
           const keyData = {};
 
           // Extract data from all keys
-          allKeys.forEach(key => {
+          allKeys.forEach((key) => {
             const id = key.getAttribute("data-id");
-            const name = key.querySelector("h3")?.textContent || `Key #${id.replace('key_', '')}`;
+            const name =
+              key.querySelector("h3")?.textContent ||
+              `Key #${id.replace("key_", "")}`;
             const image = key.querySelector("img")?.src || "";
             const priceElement = key.querySelector(".price");
             let price = 0;
@@ -404,31 +413,33 @@ document.addEventListener('DOMContentLoaded', function() {
           const cartList = document.getElementById("cart-list");
           if (!cartList) return;
 
-          cartKeys.forEach(item => {
-            const id = typeof item === 'object' ? item.id : item;
+          cartKeys.forEach((item) => {
+            const id = typeof item === "object" ? item.id : item;
             const data = keyData[id];
 
             if (data) {
               // Update price info if not already set
-              if (typeof item === 'object' && item.price === 0) {
+              if (typeof item === "object" && item.price === 0) {
                 item.price = data.price;
               }
 
               // Create and add item to cart display
               const itemElement = this.renderCartItem(
-                typeof item === 'object' ? item : { id, quantity: 1, price: data.price },
-                data
+                typeof item === "object"
+                  ? item
+                  : { id, quantity: 1, price: data.price },
+                data,
               );
               cartList.appendChild(itemElement);
             }
           });
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error fetching keys:", error);
         });
     },
 
-    renderCart: function() {
+    renderCart: function () {
       // Clear the cart list
       const cartList = document.getElementById("cart-list");
       if (!cartList) return;
@@ -463,17 +474,19 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    showNotification: function(message, type = 'success', duration = 3000) {
+    showNotification: function (message, type = "success", duration = 3000) {
       // Create notification container if it doesn't exist
-      let notificationContainer = document.querySelector('.notification-container');
+      let notificationContainer = document.querySelector(
+        ".notification-container",
+      );
       if (!notificationContainer) {
-        notificationContainer = document.createElement('div');
-        notificationContainer.className = 'notification-container';
+        notificationContainer = document.createElement("div");
+        notificationContainer.className = "notification-container";
         document.body.appendChild(notificationContainer);
       }
 
       // Create notification element
-      const notification = document.createElement('div');
+      const notification = document.createElement("div");
       notification.className = `notification ${type}`;
       notification.innerHTML = `
         <div class="notification-content">
@@ -486,18 +499,20 @@ document.addEventListener('DOMContentLoaded', function() {
       notificationContainer.appendChild(notification);
 
       // Add click handler for close button
-      notification.querySelector('.close-btn').addEventListener('click', function() {
-        notification.classList.add('dismissing');
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-          }
-        }, 300);
-      });
+      notification
+        .querySelector(".close-btn")
+        .addEventListener("click", function () {
+          notification.classList.add("dismissing");
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        });
 
       // Auto-dismiss after duration
       setTimeout(() => {
-        notification.classList.add('dismissing');
+        notification.classList.add("dismissing");
         setTimeout(() => {
           if (notification && notification.parentNode) {
             notification.parentNode.removeChild(notification);
@@ -506,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }, duration);
 
       return notification;
-    }
+    },
   };
 
   // Initialize checkout button
@@ -516,19 +531,19 @@ document.addEventListener('DOMContentLoaded', function() {
   window.cartHandler.renderCart();
 
   // Expose cart functions globally
-  window.updateItemQuantity = function(itemId, change) {
+  window.updateItemQuantity = function (itemId, change) {
     window.cartHandler.updateItemQuantity(itemId, change);
   };
 
-  window.removeFromCart = function(itemId) {
+  window.removeFromCart = function (itemId) {
     window.cartHandler.removeFromCart(itemId);
   };
 
-  window.emptyCart = function() {
+  window.emptyCart = function () {
     window.cartHandler.emptyCart();
   };
 
-  window.renderCart = function() {
+  window.renderCart = function () {
     window.cartHandler.renderCart();
   };
 

@@ -771,6 +771,27 @@ php test_database.php
 php test_rcon.php
 ```
 
+## 🔧 System Updates & Enhancements
+
+### Shopping Cart System
+The cart system has been enhanced for better reliability and user experience:
+
+- **Unified Price Format**: All prices display in `€X` format consistently across the platform
+- **Improved Error Handling**: RCON connection failures now gracefully degrade instead of causing system errors
+- **Enhanced Item Display**: Cart properly displays all item types including shards, keys, and ranks
+
+### Current Implementation Status
+- **Shards System**: Fully integrated with `shards.php` endpoint for proper cart functionality
+- **Price Display**: Standardized format with proper discount visualization
+- **Error Recovery**: Robust error handling prevents payment processing interruptions
+- **Cross-browser Compatibility**: JavaScript improvements ensure consistent behavior
+
+### File Structure Updates
+Key files have been updated to maintain system consistency:
+- Cart rendering logic (`cart.html`)
+- Payment processing (`execute_db_command.php`, `paypal-checkout.php`)
+- JavaScript handlers (`cart-processor.js`, `js/cart-handler.js`)
+
 ## 📄 License
 
 This project is proprietary software. All rights reserved.

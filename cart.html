@@ -755,8 +755,8 @@
                     // First fetch details from keys.php
                     fetchItemsFromSource("keys.php")
                         .then((keysItems) => {
-                            // Then fetch from spawners.php
-                            fetchItemsFromSource("spawners.php")
+                            // Then fetch from shards.php
+                            fetchItemsFromSource("shards.php")
                                 .then((spawnerItems) => {
                                     // Then fetch from ranks.php
                                     fetchItemsFromSource("ranks.php")
@@ -898,19 +898,63 @@
                                                         );
 
                                                     if (priceContainer) {
-                                                        // Clone the price container with discounts
-                                                        priceHtml =
-                                                            priceContainer.outerHTML;
-
                                                         // Extract price from discounted or original price
                                                         const discountedElement =
                                                             priceContainer.querySelector(
                                                                 ".discounted-price",
                                                             );
-                                                        if (discountedElement) {
+                                                        const originalPriceElement =
+                                                            priceContainer.querySelector(
+                                                                ".original-price",
+                                                            );
+
+                                                        if (
+                                                            discountedElement &&
+                                                            originalPriceElement
+                                                        ) {
+                                                            // Item has discount - show both prices
+                                                            const discountedPriceMatch =
+                                                                discountedElement.textContent.match(
+                                                                    /(\d+(?:\.\d+)?)/,
+                                                                );
+                                                            const originalPriceMatch =
+                                                                originalPriceElement.textContent.match(
+                                                                    /(\d+(?:\.\d+)?)/,
+                                                                );
+
+                                                            if (
+                                                                discountedPriceMatch &&
+                                                                originalPriceMatch
+                                                            ) {
+                                                                const discountedPrice =
+                                                                    parseFloat(
+                                                                        discountedPriceMatch[1],
+                                                                    );
+                                                                const originalPrice =
+                                                                    parseFloat(
+                                                                        originalPriceMatch[1],
+                                                                    );
+                                                                price =
+                                                                    discountedPrice;
+
+                                                                priceHtml = `<div class="price-container">
+                                                                    <p class="original-price" style="text-decoration: line-through;">€${originalPrice}</p>
+                                                                    <p class="discounted-price">€${discountedPrice}</p>
+                                                                </div>`;
+                                                            } else {
+                                                                price =
+                                                                    parseFloat(
+                                                                        discountedPriceMatch[1],
+                                                                    ) || price;
+                                                                priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                            }
+                                                        } else if (
+                                                            discountedElement
+                                                        ) {
+                                                            // Only discounted price exists
                                                             const priceMatch =
                                                                 discountedElement.textContent.match(
-                                                                    /(\d+(?:\.\d+)?)€/,
+                                                                    /(\d+(?:\.\d+)?)/,
                                                                 );
                                                             if (priceMatch) {
                                                                 price =
@@ -918,45 +962,43 @@
                                                                         priceMatch[1],
                                                                     );
                                                             }
-                                                        } else {
-                                                            const originalPriceElement =
-                                                                priceContainer.querySelector(
-                                                                    ".original-price",
+                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                        } else if (
+                                                            originalPriceElement
+                                                        ) {
+                                                            // Only original price exists
+                                                            const priceMatch =
+                                                                originalPriceElement.textContent.match(
+                                                                    /(\d+(?:\.\d+)?)/,
                                                                 );
-                                                            if (
-                                                                originalPriceElement
-                                                            ) {
-                                                                const priceMatch =
-                                                                    originalPriceElement.textContent.match(
-                                                                        /(\d+)€/,
+                                                            if (priceMatch) {
+                                                                price =
+                                                                    parseFloat(
+                                                                        priceMatch[1],
                                                                     );
-                                                                if (
-                                                                    priceMatch
-                                                                ) {
-                                                                    price =
-                                                                        parseInt(
-                                                                            priceMatch[1],
-                                                                        );
-                                                                }
                                                             }
+                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                        } else {
+                                                            // No price elements found in container
+                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
                                                         }
                                                     } else {
                                                         // Extract price from description if available
                                                         if (description) {
                                                             const priceMatch =
                                                                 description.match(
-                                                                    /(\d+)€/,
+                                                                    /(\d+(?:\.\d+)?)/,
                                                                 );
                                                             if (priceMatch) {
                                                                 price =
-                                                                    parseInt(
+                                                                    parseFloat(
                                                                         priceMatch[1],
                                                                     );
                                                             }
                                                         }
 
-                                                        // Create simple price display
-                                                        priceHtml = `<div class="price-container"><p class="discounted-price">${price}€</p></div>`;
+                                                        // Create simple price display with new format
+                                                        priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
                                                     }
 
                                                     // Check if this is a rank item

@@ -265,7 +265,7 @@ if (empty($paypalClientId)) {
 
             <!-- PayPal SDK -->
             <script src="https://www.paypal.com/sdk/js?client-id=<?php echo htmlspecialchars(
-                $paypalClientId
+                $paypalClientId,
             ); ?>&currency=EUR"></script>
 
             <p style="color: #f9f9f9">
@@ -647,7 +647,7 @@ if (empty($paypalClientId)) {
                         orderItems.innerHTML = "";
 
                         // First process spawners
-                        processItemsFromUrl("spawners.php")
+                        processItemsFromUrl("shards.php")
                             .then((spawnerTotal) => {
                                 totalPrice += spawnerTotal;
 

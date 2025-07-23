@@ -96,7 +96,7 @@ function saveToPaidUsers($username, $cart, $transactionId)
 
         // Save transaction
         $stmt = $db->prepare(
-            "INSERT OR IGNORE INTO users (username, transaction_id, cart_data, amount) VALUES (:username, :transaction_id, :cart_data, :amount)"
+            "INSERT OR IGNORE INTO users (username, transaction_id, cart_data, amount) VALUES (:username, :transaction_id, :cart_data, :amount)",
         );
         $stmt->bindValue(":username", $username, SQLITE3_TEXT);
         $stmt->bindValue(":transaction_id", $transactionId, SQLITE3_TEXT);
@@ -108,19 +108,19 @@ function saveToPaidUsers($username, $cart, $transactionId)
 
         if ($result) {
             error_log(
-                "SUCCESS: Transaction saved to paid_users database: $username (Amount: $total_amount, Transaction: $transactionId)"
+                "SUCCESS: Transaction saved to paid_users database: $username (Amount: $total_amount, Transaction: $transactionId)",
             );
             return true;
         } else {
             error_log(
-                "FAILED: Could not save transaction to paid_users database: $username"
+                "FAILED: Could not save transaction to paid_users database: $username",
             );
             return false;
         }
     } catch (Exception $e) {
         error_log(
             "ERROR: Exception while saving transaction to paid_users database: " .
-                $e->getMessage()
+                $e->getMessage(),
         );
         return false;
     }
@@ -153,7 +153,7 @@ error_log(
     "Cart format: " .
         ($cartNeedsConversion
             ? "Converted from old format"
-            : "Using new format")
+            : "Using new format"),
 );
 error_log("Cart contents: " . json_encode($cart));
 
@@ -198,7 +198,7 @@ if (empty($transactionId)) {
 // Only check if we have a valid transaction ID
 if (!empty($transactionId) && isset($executedCommands[$transactionId])) {
     error_log(
-        "Transaction $transactionId already processed, but will process again to ensure all commands execute"
+        "Transaction $transactionId already processed, but will process again to ensure all commands execute",
     );
     // Jen zalogujeme, ale necháme proběhnout znovu pro jistotu
     /*
@@ -218,7 +218,7 @@ try {
     // Spawners
     $db = new SQLite3("blog.sqlite");
     $spawners = $db->query(
-        "SELECT id, nazev, prikaz FROM spawners WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
+        "SELECT id, nazev, prikaz FROM spawners WHERE prikaz IS NOT NULL AND trim(prikaz) != ''",
     );
     while ($row = $spawners->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
@@ -234,7 +234,7 @@ try {
     // Keys
     $dbKeys = new SQLite3("keys.sqlite");
     $keys = $dbKeys->query(
-        "SELECT id, name, prikaz FROM Keys WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
+        "SELECT id, name, prikaz FROM Keys WHERE prikaz IS NOT NULL AND trim(prikaz) != ''",
     );
     while ($row = $keys->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
@@ -250,7 +250,7 @@ try {
     // Ranks
     $dbRanks = new SQLite3("ranks.sqlite");
     $ranks = $dbRanks->query(
-        "SELECT id, nazev, prikaz FROM ranks WHERE prikaz IS NOT NULL AND trim(prikaz) != ''"
+        "SELECT id, nazev, prikaz FROM ranks WHERE prikaz IS NOT NULL AND trim(prikaz) != ''",
     );
     while ($row = $ranks->fetchArray(SQLITE3_ASSOC)) {
         if (!empty($row["prikaz"])) {
@@ -272,7 +272,7 @@ try {
     error_log(
         "Fetched " .
             count($commands) .
-            " commands from all DBs for user: {$username}"
+            " commands from all DBs for user: {$username}",
     );
 
     // RCON connection details z .env
@@ -284,7 +284,14 @@ try {
     // Connect to RCON
     $rcon = new Rcon($host, $port, $password, $timeout);
 
-    if ($rcon->connect()) {
+    try {
+        $connected = $rcon->connect();
+    } catch (Exception $e) {
+        error_log("RCON connection failed: " . $e->getMessage());
+        $connected = false;
+    }
+
+    if ($connected) {
         // Save transaction to paid_users database first
         saveToPaidUsers($username, $cart, $transactionId);
 
@@ -337,7 +344,7 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Key command not matched with cart items. Key ID: " .
-                            $cmd["id"]
+                            $cmd["id"],
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -382,7 +389,7 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Rank command not matched with cart items. Rank ID: " .
-                            $cmd["id"]
+                            $cmd["id"],
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -422,7 +429,7 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Spawner command not matched with cart items. Spawner ID: " .
-                            $cmd["id"]
+                            $cmd["id"],
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -436,7 +443,7 @@ try {
             $commandText = str_replace(
                 "{username}",
                 $username,
-                $cmd["command"]
+                $cmd["command"],
             );
             $commandText = str_replace("%USERNAME%", $username, $commandText);
             $commandText = str_replace('$usernamemc', $username, $commandText);
@@ -498,11 +505,11 @@ try {
                         stripos($cmd["name"], "membership") !== false ||
                         preg_match(
                             "/\b(vip|premium|member)\b/i",
-                            $cmd["name"]
+                            $cmd["name"],
                         ) ||
                         preg_match(
                             "/\b(vip|premium|member)\b/i",
-                            $cmd["command"]
+                            $cmd["command"],
                         )
                     ) {
                         $isVipRank = true;
@@ -520,7 +527,7 @@ try {
                             ", IsVIP: " .
                             ($isVipRank ? "YES" : "NO") .
                             ", Reason: " .
-                            ($vipDetectionReason ?: "No VIP pattern found")
+                            ($vipDetectionReason ?: "No VIP pattern found"),
                     );
 
                     // Special handling for VIP rank - save to vip.sqlite database
@@ -528,41 +535,41 @@ try {
                         try {
                             error_log(
                                 "Attempting to save VIP user to database: " .
-                                    $username
+                                    $username,
                             );
 
                             $dbVip = new SQLite3("vip.sqlite");
                             $dbVip->exec(
-                                "CREATE TABLE IF NOT EXISTS vip_users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
+                                "CREATE TABLE IF NOT EXISTS vip_users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
                             );
 
                             // Check if user already exists
                             $checkStmt = $dbVip->prepare(
-                                "SELECT COUNT(*) as count FROM vip_users WHERE username = :username"
+                                "SELECT COUNT(*) as count FROM vip_users WHERE username = :username",
                             );
                             $checkStmt->bindValue(
                                 ":username",
                                 $username,
-                                SQLITE3_TEXT
+                                SQLITE3_TEXT,
                             );
                             $checkResult = $checkStmt->execute();
                             $existingCount = $checkResult->fetchArray(
-                                SQLITE3_ASSOC
+                                SQLITE3_ASSOC,
                             )["count"];
 
                             if ($existingCount > 0) {
                                 error_log(
                                     "VIP user already exists in database: " .
-                                        $username
+                                        $username,
                                 );
                             } else {
                                 $stmtVip = $dbVip->prepare(
-                                    "INSERT INTO vip_users (username) VALUES (:username)"
+                                    "INSERT INTO vip_users (username) VALUES (:username)",
                                 );
                                 $stmtVip->bindValue(
                                     ":username",
                                     $username,
-                                    SQLITE3_TEXT
+                                    SQLITE3_TEXT,
                                 );
                                 $result = $stmtVip->execute();
 
@@ -572,12 +579,12 @@ try {
                                             $username .
                                             " (Reason: " .
                                             $vipDetectionReason .
-                                            ")"
+                                            ")",
                                     );
                                 } else {
                                     error_log(
                                         "FAILED: Could not save VIP user to database: " .
-                                            $username
+                                            $username,
                                     );
                                 }
                             }
@@ -588,7 +595,7 @@ try {
                                 "ERROR: Exception while saving VIP user to database: " .
                                     $username .
                                     " - " .
-                                    $e->getMessage()
+                                    $e->getMessage(),
                             );
                         }
                     }
@@ -615,7 +622,7 @@ try {
                 count($executedCommandIds["key"]) .
                 " klíčů, " .
                 count($executedCommandIds["rank"]) .
-                " ranků"
+                " ranků",
         );
 
         // Track this transaction as executed
@@ -638,7 +645,7 @@ try {
         // Save to file
         file_put_contents(
             EXECUTED_COMMANDS_FILE,
-            json_encode($executedCommands)
+            json_encode($executedCommands),
         );
 
         // Process response
