@@ -518,6 +518,46 @@ try {
                             "Premium/Membership pattern detected";
                     }
 
+                    // Enhanced Eternal detection with better debugging
+                    $isEternalRank = false;
+                    $eternalDetectionReason = "";
+
+                    // Check for Eternal in name (case insensitive)
+                    if (stripos($cmd["name"], "eternal") !== false) {
+                        $isEternalRank = true;
+                        $eternalDetectionReason =
+                            "Eternal found in name: " . $cmd["name"];
+                    }
+
+                    // Check for Eternal in command (case insensitive)
+                    if (stripos($cmd["command"], "eternal") !== false) {
+                        $isEternalRank = true;
+                        $eternalDetectionReason .=
+                            ($eternalDetectionReason ? " AND " : "") .
+                            "Eternal found in command: " .
+                            $cmd["command"];
+                    }
+
+                    // Additional checks for common Eternal patterns
+                    if (
+                        stripos($cmd["name"], "eternity") !== false ||
+                        stripos($cmd["command"], "eternity") !== false ||
+                        stripos($cmd["name"], "forever") !== false ||
+                        preg_match(
+                            "/\b(eternal|eternity|forever)\b/i",
+                            $cmd["name"],
+                        ) ||
+                        preg_match(
+                            "/\b(eternal|eternity|forever)\b/i",
+                            $cmd["command"],
+                        )
+                    ) {
+                        $isEternalRank = true;
+                        $eternalDetectionReason .=
+                            ($eternalDetectionReason ? " AND " : "") .
+                            "Eternal/Eternity/Forever pattern detected";
+                    }
+
                     // Log VIP detection attempt
                     error_log(
                         "VIP Detection - Rank: " .
@@ -528,6 +568,19 @@ try {
                             ($isVipRank ? "YES" : "NO") .
                             ", Reason: " .
                             ($vipDetectionReason ?: "No VIP pattern found"),
+                    );
+
+                    // Log Eternal detection attempt
+                    error_log(
+                        "Eternal Detection - Rank: " .
+                            $cmd["name"] .
+                            ", Command: " .
+                            $cmd["command"] .
+                            ", IsEternal: " .
+                            ($isEternalRank ? "YES" : "NO") .
+                            ", Reason: " .
+                            ($eternalDetectionReason ?:
+                                "No Eternal pattern found"),
                     );
 
                     // Special handling for VIP rank - save to vip.sqlite database
@@ -593,6 +646,76 @@ try {
                         } catch (Exception $e) {
                             error_log(
                                 "ERROR: Exception while saving VIP user to database: " .
+                                    $username .
+                                    " - " .
+                                    $e->getMessage(),
+                            );
+                        }
+                    }
+
+                    // Special handling for Eternal rank - save to eternal.sqlite database
+                    if ($isEternalRank) {
+                        try {
+                            error_log(
+                                "Attempting to save Eternal user to database: " .
+                                    $username,
+                            );
+
+                            $dbEternal = new SQLite3("eternal.sqlite");
+                            $dbEternal->exec(
+                                "CREATE TABLE IF NOT EXISTS eternal_users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
+                            );
+
+                            // Check if user already exists
+                            $checkStmt = $dbEternal->prepare(
+                                "SELECT COUNT(*) as count FROM eternal_users WHERE username = :username",
+                            );
+                            $checkStmt->bindValue(
+                                ":username",
+                                $username,
+                                SQLITE3_TEXT,
+                            );
+                            $checkResult = $checkStmt->execute();
+                            $existingCount = $checkResult->fetchArray(
+                                SQLITE3_ASSOC,
+                            )["count"];
+
+                            if ($existingCount > 0) {
+                                error_log(
+                                    "Eternal user already exists in database: " .
+                                        $username,
+                                );
+                            } else {
+                                $stmtEternal = $dbEternal->prepare(
+                                    "INSERT INTO eternal_users (username) VALUES (:username)",
+                                );
+                                $stmtEternal->bindValue(
+                                    ":username",
+                                    $username,
+                                    SQLITE3_TEXT,
+                                );
+                                $result = $stmtEternal->execute();
+
+                                if ($result) {
+                                    error_log(
+                                        "SUCCESS: Eternal user saved to database: " .
+                                            $username .
+                                            " (Reason: " .
+                                            $eternalDetectionReason .
+                                            ")",
+                                    );
+                                } else {
+                                    error_log(
+                                        "FAILED: Could not save Eternal user to database: " .
+                                            $username,
+                                    );
+                                }
+                            }
+
+                            $dbEternal->close();
+                        } catch (Exception $e) {
+                            error_log(
+                                "ERROR: Exception while saving Eternal user to database: " .
                                     $username .
                                     " - " .
                                     $e->getMessage(),

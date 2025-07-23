@@ -277,6 +277,7 @@ $username = htmlspecialchars($_SESSION["username"]);
                     ><li class="thing-grid-item" style="font-size: 4rem;">OUR TEAM</li></a
                 >
                 <a href="vip_manager"><li class="thing-grid-item" style="font-size: 3.5rem;">VIP MANAGER</li></a>
+                <a href="eternal_manager.php"><li class="thing-grid-item" style="font-size: 3rem;">ETERNAL MANAGER</li></a>
                 <a href="paid-list.php"
                     ><li class="thing-grid-item" style="font-size: 3.5rem;">
                         PAID USERS

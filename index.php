@@ -1,6 +1,7 @@
 <?php
 // Include the RCON functionality
 require_once "vip-rcon.php";
+require_once "eternal-rcon.php";
 
 // Function to automatically clean up expired VIP users
 function cleanupExpiredVipUsers()
@@ -51,14 +52,14 @@ function cleanupExpiredVipUsers()
                     file_put_contents(
                         "vip_cleanup_log.txt",
                         $log_message,
-                        FILE_APPEND
+                        FILE_APPEND,
                     );
                 }
 
                 // Always try to delete from database regardless of RCON result
                 try {
                     $stmt = $db->prepare(
-                        "DELETE FROM vip_users WHERE username = :username"
+                        "DELETE FROM vip_users WHERE username = :username",
                     );
                     $stmt->bindValue(":username", $remove_name, SQLITE3_TEXT);
                     $result_execute = $stmt->execute();
@@ -75,7 +76,7 @@ function cleanupExpiredVipUsers()
                         file_put_contents(
                             "vip_cleanup_log.txt",
                             $log_message,
-                            FILE_APPEND
+                            FILE_APPEND,
                         );
                     } else {
                         $failed_count++;
@@ -85,7 +86,7 @@ function cleanupExpiredVipUsers()
                         file_put_contents(
                             "vip_cleanup_log.txt",
                             $log_message,
-                            FILE_APPEND
+                            FILE_APPEND,
                         );
                     }
                 } catch (Exception $e) {
@@ -98,7 +99,7 @@ function cleanupExpiredVipUsers()
                     file_put_contents(
                         "vip_cleanup_log.txt",
                         $log_message,
-                        FILE_APPEND
+                        FILE_APPEND,
                     );
                 }
             }
@@ -128,6 +129,138 @@ function cleanupExpiredVipUsers()
     }
 }
 
+// Function to automatically clean up expired Eternal users
+function cleanupExpiredEternalUsers()
+{
+    try {
+        // Check if database exists
+        if (!file_exists("eternal.sqlite")) {
+            return 0;
+        }
+
+        $db = new SQLite3("eternal.sqlite");
+
+        // Helper function to calculate days left for eternal users
+        function getEternalDaysLeft($created_at)
+        {
+            $created_ts = strtotime($created_at);
+            $expire_ts = $created_ts + 30 * 24 * 60 * 60;
+            $now = time();
+            $diff = $expire_ts - $now;
+            $days_left = ceil($diff / (60 * 60 * 24));
+            if ($days_left < 0) {
+                $days_left = 0;
+            }
+            return $days_left;
+        }
+
+        // Find and delete expired users
+        $result = $db->query(
+            "SELECT id, username, created_at FROM eternal_users",
+        );
+        $deleted_count = 0;
+        $failed_count = 0;
+
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $days_left = getEternalDaysLeft($row["created_at"]);
+            if ($days_left <= 0) {
+                $remove_name = $row["username"];
+
+                // First remove the Eternal permissions via RCON (non-blocking)
+                $rcon_result = false;
+                try {
+                    $rcon_result = removeEternalPermissions($remove_name);
+                } catch (Exception $rcon_e) {
+                    // Log RCON error but continue with database cleanup
+                    $log_message =
+                        date("Y-m-d H:i:s") .
+                        " - RCON error for $remove_name: " .
+                        $rcon_e->getMessage() .
+                        "\n";
+                    file_put_contents(
+                        "eternal_cleanup_log.txt",
+                        $log_message,
+                        FILE_APPEND,
+                    );
+                }
+
+                // Always try to delete from database regardless of RCON result
+                try {
+                    $stmt = $db->prepare(
+                        "DELETE FROM eternal_users WHERE username = :username",
+                    );
+                    $stmt->bindValue(":username", $remove_name, SQLITE3_TEXT);
+                    $result_execute = $stmt->execute();
+
+                    if ($result_execute) {
+                        $deleted_count++;
+
+                        // Log successful removal
+                        $log_message =
+                            date("Y-m-d H:i:s") .
+                            " - Removed Eternal user: $remove_name - RCON: " .
+                            ($rcon_result ? "Success" : "Failed") .
+                            " - Database: Success\n";
+                        file_put_contents(
+                            "eternal_cleanup_log.txt",
+                            $log_message,
+                            FILE_APPEND,
+                        );
+                    } else {
+                        $failed_count++;
+                        $log_message =
+                            date("Y-m-d H:i:s") .
+                            " - Failed to delete from database: $remove_name\n";
+                        file_put_contents(
+                            "eternal_cleanup_log.txt",
+                            $log_message,
+                            FILE_APPEND,
+                        );
+                    }
+                } catch (Exception $e) {
+                    $failed_count++;
+                    $log_message =
+                        date("Y-m-d H:i:s") .
+                        " - Database deletion error for $remove_name: " .
+                        $e->getMessage() .
+                        "\n";
+                    file_put_contents(
+                        "eternal_cleanup_log.txt",
+                        $log_message,
+                        FILE_APPEND,
+                    );
+                }
+            }
+        }
+
+        // Close database connection
+        $db->close();
+
+        // Log cleanup summary
+        if ($deleted_count > 0 || $failed_count > 0) {
+            $log_message =
+                date("Y-m-d H:i:s") .
+                " - Cleanup summary: Removed $deleted_count expired Eternal users, $failed_count failures\n";
+            file_put_contents(
+                "eternal_cleanup_log.txt",
+                $log_message,
+                FILE_APPEND,
+            );
+        }
+
+        return $deleted_count;
+    } catch (Exception $e) {
+        // Log error
+        $log_message =
+            date("Y-m-d H:i:s") .
+            " - Critical error in Eternal cleanup process: " .
+            $e->getMessage() .
+            "\n";
+        file_put_contents("eternal_cleanup_log.txt", $log_message, FILE_APPEND);
+        return 0;
+    }
+}
+
 // Run cleanup on page loads (with throttling to prevent excessive execution)
 $cleanup_file = "last_cleanup.txt";
 $should_run_cleanup = true;
@@ -143,11 +276,18 @@ if (file_exists($cleanup_file)) {
 }
 
 if ($should_run_cleanup) {
-    $deleted_count = cleanupExpiredVipUsers();
+    $vip_deleted_count = cleanupExpiredVipUsers();
+    $eternal_deleted_count = cleanupExpiredEternalUsers();
     file_put_contents($cleanup_file, time());
 
-    if ($deleted_count > 0) {
-        error_log("VIP Cleanup: Removed $deleted_count expired users");
+    if ($vip_deleted_count > 0) {
+        error_log("VIP Cleanup: Removed $vip_deleted_count expired users");
+    }
+
+    if ($eternal_deleted_count > 0) {
+        error_log(
+            "Eternal Cleanup: Removed $eternal_deleted_count expired users",
+        );
     }
 }
 ?>

@@ -407,6 +407,34 @@ CREATE TABLE vip_users (
 - `auto_cleanup.php` - Automated cleanup script
 - `index.php` - Automatic cleanup on page loads
 
+### Eternal Users Table (`eternal.sqlite`)
+```sql
+CREATE TABLE eternal_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Eternal System Overview:**
+- **Duration**: Eternal access lasts 30 days from purchase date
+- **Auto-cleanup**: Expired Eternal users are automatically removed
+- **RCON Integration**: Automatic permission management via RCON commands
+- **Database Tracking**: All Eternal purchases tracked in `eternal_users` table
+
+**Eternal Detection Logic:**
+- Automatically detects Eternal purchases based on rank name or command containing:
+  - "eternal" (case insensitive)
+  - "eternity" (case insensitive)
+  - "forever" (case insensitive)
+- When Eternal rank is purchased, user is automatically added to `eternal_users` table
+- Enhanced logging for Eternal detection debugging
+
+**Eternal Management Files:**
+- `eternal_manager.php` - Admin panel for Eternal user management
+- `eternal-rcon.php` - RCON permission management
+- `index.php` - Automatic cleanup on page loads
+
 ### Paid Users Table (`paid_users.sqlite`)
 ```sql
 CREATE TABLE users (
@@ -487,6 +515,17 @@ $command = "lp user {$username} clear";
 $rcon->sendCommand($command);
 ```
 
+#### Eternal Permission Management
+```php
+// Grant Eternal permissions
+$command = "lp user {$username} parent set eternal";
+$rcon->sendCommand($command);
+
+// Remove Eternal permissions
+$command = "lp user {$username} clear";
+$rcon->sendCommand($command);
+```
+
 #### Item Delivery
 ```php
 // Give shard to player
@@ -515,6 +554,12 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
 
 #### VIP Manager (`vip_manager.php`)
 - View all VIP users
+- Check expiration dates
+- Manual user removal
+- RCON permission sync
+
+#### Eternal Manager (`eternal_manager.php`)
+- View all Eternal users
 - Check expiration dates
 - Manual user removal
 - RCON permission sync
@@ -635,13 +680,8 @@ tail -f vip_rcon_log.txt
 
 #### VIP System Issues
 
-**Symptoms:**
-- VIP purchase successful but user not in `vip_users` table
-- RCON commands execute but database entry missing
-- Users disappearing from VIP list after purchase
-- Transaction not recorded in `paid_users` table
+**Common VIP-related problems:**
 
-**Root Cause Analysis:**
 1. **Auto-Cleanup System**: VIP users are automatically removed after 30 days
 2. **Detection Issues**: VIP ranks not properly detected during purchase
 3. **Database Errors**: SQLite permission or corruption issues
@@ -673,15 +713,70 @@ tail -f vip_rcon_log.txt
    SUCCESS: VIP user saved to database: username (Reason: VIP found in name)
    ```
 
+#### Eternal System Issues
+
+**Common Eternal-related problems:**
+
+1. **Auto-Cleanup System**: Eternal users are automatically removed after 30 days
+2. **Detection Issues**: Eternal ranks not properly detected during purchase
+3. **Database Errors**: SQLite permission or corruption issues
+4. **Transaction Flow**: Issues in `execute_db_command.php` process
+
+**Debug Steps:**
+
+1. **Verify Transaction and Eternal Status:**
+   ```sql
+   -- Recent transactions with amounts
+   SELECT username, transaction_id, amount, cart_data, created_at
+   FROM users ORDER BY created_at DESC LIMIT 10;
+
+   -- Current Eternal users with expiry
+   SELECT username, created_at,
+          julianday('now') - julianday(created_at) as days_old
+   FROM eternal_users;
+   ```
+
+2. **Check Cleanup Logs:**
+   ```bash
+   tail -f eternal_cleanup_log.txt
+   tail -f eternal_rcon_log.txt
+   ```
+
+3. **Expected Log Entries:**
+   ```
+   SUCCESS: Transaction saved to paid_users database: username (Amount: 15.00, Transaction: tx_456)
+   Eternal Detection - Rank: Eternal Membership, IsEternal: YES
+   SUCCESS: Eternal user saved to database: username (Reason: Eternal found in name)
+   ```
+
 4. **Manual VIP Management:**
-   - Add VIP: Use admin panel `/vip_manager`
-   - Check expiry: VIP expires 30 days after `created_at`
-   - Manual cleanup: Direct SQL commands (see below)
+   ```php
+   // Add VIP user manually
+   $db = new SQLite3("vip.sqlite");
+   $stmt = $db->prepare("INSERT INTO vip_users (username) VALUES (:username)");
+   $stmt->bindValue(":username", $username, SQLITE3_TEXT);
+   $stmt->execute();
+   ```
+
+5. **Manual Eternal Management:**
+   ```php
+   // Add Eternal user manually
+   $db = new SQLite3("eternal.sqlite");
+   $stmt = $db->prepare("INSERT INTO eternal_users (username) VALUES (:username)");
+   $stmt->bindValue(":username", $username, SQLITE3_TEXT);
+   $stmt->execute();
+   ```
+**Admin Panel Management:**
+- **VIP**: Use admin panel `/vip_manager.php`
+- **Eternal**: Use admin panel `/eternal_manager.php`
+- **Check expiry**: Both VIP and Eternal expire 30 days after `created_at`
+- **Manual cleanup**: Direct SQL commands (see above)
 
 **Common Issues:**
 - **Auto-cleanup too aggressive**: Check `index.php` cleanup throttling
-- **Rank name mismatch**: Ensure rank contains "vip", "premium", or "membership"
-- **Database permissions**: `chmod 664 vip.sqlite`
+- **VIP rank name mismatch**: Ensure rank contains "vip", "premium", or "membership"
+- **Eternal rank name mismatch**: Ensure rank contains "eternal", "eternity", or "forever"
+- **Database permissions**: `chmod 664 vip.sqlite eternal.sqlite`
 - **RCON failures**: Check RCON connectivity in cleanup logs
 
 #### Database Corruption
@@ -700,8 +795,10 @@ APP_DEBUG=true
 ```
 
 ### Log Files
-- `vip_rcon_log.txt` - RCON operation logs
+- `vip_rcon_log.txt` - VIP RCON operation logs
 - `vip_cleanup_log.txt` - VIP cleanup logs
+- `eternal_rcon_log.txt` - Eternal RCON operation logs
+- `eternal_cleanup_log.txt` - Eternal cleanup logs
 - `debug.txt` - General debug information
 
 ## 🔧 Debug Tools
@@ -709,10 +806,18 @@ APP_DEBUG=true
 ### VIP System Debug Tools
 
 **VIP System Management**
-- Use admin panel at `/vip_manager` for VIP user management
+- Use admin panel at `/vip_manager.php` for VIP user management
 - Check VIP cleanup logs in `vip_cleanup_log.txt`
 - Monitor RCON operations in `vip_rcon_log.txt`
 - Review enhanced VIP detection logic in `execute_db_command.php`
+
+### Eternal System Debug Tools
+
+**Eternal System Management**
+- Use admin panel at `/eternal_manager.php` for Eternal user management
+- Check Eternal cleanup logs in `eternal_cleanup_log.txt`
+- Monitor RCON operations in `eternal_rcon_log.txt`
+- Review enhanced Eternal detection logic in `execute_db_command.php`
 
 **Database Direct Access**
 ```sql
@@ -726,11 +831,23 @@ SELECT username, created_at,
        julianday('now') - julianday(created_at) as days_old
 FROM vip_users;
 
+-- Check Eternal users with expiry info
+SELECT username, created_at,
+       datetime(created_at, '+30 days') as expires_at,
+       julianday('now') - julianday(created_at) as days_old
+FROM eternal_users;
+
 -- Find transactions without VIP records (potential issues)
 SELECT u.username, u.amount, u.cart_data, u.created_at
 FROM users u
 LEFT JOIN vip_users v ON u.username = v.username
 WHERE u.cart_data LIKE '%rank_%' AND v.username IS NULL;
+
+-- Find transactions without Eternal records (potential issues)
+SELECT u.username, u.amount, u.cart_data, u.created_at
+FROM users u
+LEFT JOIN eternal_users e ON u.username = e.username
+WHERE u.cart_data LIKE '%rank_%' AND e.username IS NULL;
 
 -- Manual transaction addition
 INSERT INTO users (username, transaction_id, amount, cart_data)
@@ -738,6 +855,9 @@ VALUES ('username_here', 'tx_12345', 10.00, '[{"id":"rank_2","quantity":1,"price
 
 -- Manual VIP addition
 INSERT INTO vip_users (username) VALUES ('username_here');
+
+-- Manual Eternal addition
+INSERT INTO eternal_users (username) VALUES ('username_here');
 ```
 
 ## 🤝 Contributing
