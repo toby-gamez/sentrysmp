@@ -1335,12 +1335,12 @@ body.dark .item-subtotal.discounted-price {
 }
 
 .badge-leader {
-    background: #21dcb7;
+    background: darkred;
     color: white;
 }
 
 .badge-manager {
-    background: #33e8d8;
+    background: orangered;
     color: white;
 }
 
