@@ -310,7 +310,7 @@ a:has(li) {
 }
 .item-red {
     background: linear-gradient(to right, red, orange);
-    font-size: 3rem;
+    font-size: 4rem;
 }
 .item-pink {
     background: linear-gradient(to right, #c200bf, #dba7da);
@@ -1378,6 +1378,11 @@ body.dark .item-subtotal.discounted-price {
 }
 
 /* Unified dark mode button styles */
+body.dark .team-item {
+    background: #242424;
+    border-color: lightgray;
+}
+
 body.dark .update-btn,
 body.dark .informational {
     background-color: #1d8be2;

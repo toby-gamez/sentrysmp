@@ -685,6 +685,23 @@ if (count($announcements) > 0) {
                     padding: 0 15px;
                 }
             }
+            .announcement a {
+                color: #dc3545;
+                transition: all ease 0.3s;
+                font-weight: bold;
+            }
+
+            .announcement a:hover {
+                color: #c82333;
+            }
+
+            body.dark .announcement a {
+                color: #dc0000;
+            }
+
+            body.dark .announcement a:hover {
+                color: #b90000;
+            }
         </style>
     </head>
     <body>
@@ -712,7 +729,7 @@ if (count($announcements) > 0) {
                     ><li class="thing-grid-item item-gold">RANKS</li></a
                 >
                 <a href="battlepasses.php"
-                    ><li class="thing-grid-item item-red">BATTLE PASSES</li></a
+                    ><li class="thing-grid-item item-red">BATTLE PASS</li></a
                 >
                 <!--
                 <a href="community.html"

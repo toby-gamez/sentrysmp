@@ -84,7 +84,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS Battlepasses (
         <meta http-equiv="content-language" content="en" />
         <meta name="language" content="English" />
 
-        <title>Battle passes - Sentry SMP</title>
+        <title>Battle Pass - Sentry SMP</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/style.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -765,7 +765,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS Battlepasses (
         <header id="header-main"></header>
         <div class="container">
             <div class="main-wrapper">
-                <h1 class="main">Battle Passes</h1>
+                <h1 class="main">Battle Pass</h1>
             </div>
             <div class="spawner-grid">
                 <?php while ($row = $results->fetchArray(SQLITE3_ASSOC)): ?>
