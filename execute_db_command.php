@@ -247,6 +247,22 @@ try {
         }
     }
 
+    // Battlepasses
+    $dbBattlepasses = new SQLite3("battlepasses.sqlite");
+    $battlepasses = $dbBattlepasses->query(
+        "SELECT id, name, prikaz FROM Battlepasses WHERE prikaz IS NOT NULL AND trim(prikaz) != ''",
+    );
+    while ($row = $battlepasses->fetchArray(SQLITE3_ASSOC)) {
+        if (!empty($row["prikaz"])) {
+            $commands[] = [
+                "id" => $row["id"],
+                "name" => $row["name"] ?? "Battlepass",
+                "command" => $row["prikaz"],
+                "type" => "battlepass",
+            ];
+        }
+    }
+
     // Ranks
     $dbRanks = new SQLite3("ranks.sqlite");
     $ranks = $dbRanks->query(
@@ -302,6 +318,7 @@ try {
         $executedCommandIds = [
             "spawner" => [],
             "key" => [],
+            "battlepass" => [],
             "rank" => [],
         ];
 
@@ -311,7 +328,8 @@ try {
             // For keys, check if key_id is in cart
             if ($cmd["type"] === "key") {
                 $keyMatches = false;
-                $keyId = $cmd["id"]; // Přímo použijeme ID klíče ve formátu key_123
+                $keyId = "key_" . $cmd["id"]; // Přidáme prefix k ID klíče
+                $cmd["prefixed_id"] = $keyId; // Uložíme prefixované ID pro pozdější použití
                 $itemQuantity = 0;
 
                 foreach ($cart as $cartItem) {
@@ -322,7 +340,7 @@ try {
                             : null;
                         if (
                             $cartItemId === $keyId ||
-                            false // odstraněno originalId, už není potřeba
+                            $cartItemId === $cmd["id"] // Také zkusíme původní ID bez prefixu
                         ) {
                             $keyMatches = true;
                             $itemQuantity = isset($cartItem["quantity"])
@@ -332,7 +350,10 @@ try {
                         }
                     }
                     // Fallback for old format (string IDs)
-                    elseif (is_string($cartItem) && $cartItem === $keyId) {
+                    elseif (
+                        is_string($cartItem) &&
+                        ($cartItem === $keyId || $cartItem === $cmd["id"])
+                    ) {
                         $keyMatches = true;
                         $itemQuantity = 1;
                         break;
@@ -344,7 +365,63 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Key command not matched with cart items. Key ID: " .
-                            $cmd["id"],
+                            $cmd["id"] .
+                            " (looking for: " .
+                            $keyId .
+                            ")",
+                    );
+                    error_log("Cart items: " . json_encode($cart));
+                    continue;
+                }
+
+                // Store the quantity for future use
+                $cmd["quantity"] = $itemQuantity;
+            }
+            // For battlepasses, check if battlepass_id is in cart
+            elseif ($cmd["type"] === "battlepass") {
+                $battlepassMatches = false;
+                $battlepassId = "battlepass_" . $cmd["id"]; // Přidáme prefix k ID battlepasu
+                $cmd["prefixed_id"] = $battlepassId; // Uložíme prefixované ID pro pozdější použití
+                $itemQuantity = 0;
+
+                foreach ($cart as $cartItem) {
+                    // Check if cartItem is in the new format (object with id property)
+                    if (is_array($cartItem) || is_object($cartItem)) {
+                        $cartItemId = isset($cartItem["id"])
+                            ? $cartItem["id"]
+                            : null;
+                        if (
+                            $cartItemId === $battlepassId ||
+                            $cartItemId === $cmd["id"] // Také zkusíme původní ID bez prefixu
+                        ) {
+                            $battlepassMatches = true;
+                            $itemQuantity = isset($cartItem["quantity"])
+                                ? intval($cartItem["quantity"])
+                                : 1;
+                            break;
+                        }
+                    }
+                    // Fallback for old format (string IDs)
+                    elseif (
+                        is_string($cartItem) &&
+                        ($cartItem === $battlepassId ||
+                            $cartItem === $cmd["id"])
+                    ) {
+                        $battlepassMatches = true;
+                        $itemQuantity = 1;
+                        break;
+                    }
+                }
+
+                // Pokud není shoda, zkontrolujeme ještě jednou samotné ID battlepasu
+                if (!$battlepassMatches) {
+                    // Přidání debugovacích informací
+                    error_log(
+                        "Battlepass command not matched with cart items. Battlepass ID: " .
+                            $cmd["id"] .
+                            " (looking for: " .
+                            $battlepassId .
+                            ")",
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -356,7 +433,8 @@ try {
             // For ranks, check if rank_id is in cart
             elseif ($cmd["type"] === "rank") {
                 $rankMatches = false;
-                $rankId = $cmd["id"]; // Přímo použijeme ID ranku ve formátu rank_123
+                $rankId = "rank_" . $cmd["id"]; // Přidáme prefix k ID ranku
+                $cmd["prefixed_id"] = $rankId; // Uložíme prefixované ID pro pozdější použití
                 $itemQuantity = 0;
 
                 foreach ($cart as $cartItem) {
@@ -367,7 +445,7 @@ try {
                             : null;
                         if (
                             $cartItemId === $rankId ||
-                            false // odstraněno originalId, už není potřeba
+                            $cartItemId === $cmd["id"] // Také zkusíme původní ID bez prefixu
                         ) {
                             $rankMatches = true;
                             $itemQuantity = isset($cartItem["quantity"])
@@ -377,7 +455,10 @@ try {
                         }
                     }
                     // Fallback for old format (string IDs)
-                    elseif (is_string($cartItem) && $cartItem === $rankId) {
+                    elseif (
+                        is_string($cartItem) &&
+                        ($cartItem === $rankId || $cartItem === $cmd["id"])
+                    ) {
                         $rankMatches = true;
                         $itemQuantity = 1;
                         break;
@@ -389,7 +470,10 @@ try {
                     // Přidání debugovacích informací
                     error_log(
                         "Rank command not matched with cart items. Rank ID: " .
-                            $cmd["id"],
+                            $cmd["id"] .
+                            " (looking for: " .
+                            $rankId .
+                            ")",
                     );
                     error_log("Cart items: " . json_encode($cart));
                     continue;
@@ -474,9 +558,11 @@ try {
                 if ($cmd["type"] === "spawner") {
                     $executedCommandIds["spawner"][] = $cmd["id"];
                 } elseif ($cmd["type"] === "key") {
-                    $executedCommandIds["key"][] = $cmd["originalId"];
+                    $executedCommandIds["key"][] = $cmd["prefixed_id"];
+                } elseif ($cmd["type"] === "battlepass") {
+                    $executedCommandIds["battlepass"][] = $cmd["prefixed_id"];
                 } elseif ($cmd["type"] === "rank") {
-                    $executedCommandIds["rank"][] = $cmd["originalId"];
+                    $executedCommandIds["rank"][] = $cmd["prefixed_id"];
 
                     // Enhanced VIP detection with better debugging
                     $isVipRank = false;

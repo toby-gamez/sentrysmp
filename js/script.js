@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <ul>
                 <li><a href="about.html">About server</a></li>
                 <li><a href="our-team.php">Our Team</a></li>
-                <li><a href="news.html">News</a></li>
+                <li><a href="news.php">News</a></li>
                 <li><a href="changelog.html">Web Changelog</a></li>
             </ul>
         </div>
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <p class="footer-p">© 2025 Sentry SMP. All rights reserved.</p>
         <p class="mojang-notice">We are not affiliated with or endorsed by Mojang, AB.</p>
     </div>
-    <p class="web-version">2.4</p>
+    <p class="web-version">2.5</p>
   `;
   footer.innerHTML = footerContent;
 

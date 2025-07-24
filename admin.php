@@ -265,7 +265,7 @@ $username = htmlspecialchars($_SESSION["username"]);
                     <span>Logout: <button onclick="showNotification('Logging out...', 'info', 1500); setTimeout(function() { window.location.href='logout.php'; }, 1000)">Logout</button></div>
             </div>
             <ul class="thing-grid">
-                <a href="add_announcements.php"><li class="thing-grid-item">NEWS</li></a>
+                <a href="edit_passes.php"><li class="thing-grid-item" style="font-size: 3rem;">BATTLE PASSES</li></a>
                 <a href="edit_shards.php"><li class="thing-grid-item two">SHARDS</li></a>
                 <a href="edit_keys.php"
                     ><li class="thing-grid-item">KEYS</li></a

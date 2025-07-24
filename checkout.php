@@ -478,9 +478,10 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                                 const id = item.getAttribute("data-id");
                                                 const isKeyItem = isKey || id.toString().startsWith('key_');
                                                 const isRankItem = id.toString().startsWith('rank_');
+                                                const isBattlepassItem = id.toString().startsWith('battlepass_');
                                                 const cartItem = cart.find(item => String(item.id) === String(id));
                                                 const inCart = cartItem !== undefined;
-                                                console.log(`Checking item ID: ${id}, isKeyItem: ${isKeyItem}, isRankItem: ${isRankItem}, in cart: ${inCart}, quantity: ${inCart ? cartItem.quantity : 0}`);
+                                                console.log(`Checking item ID: ${id}, isKeyItem: ${isKeyItem}, isRankItem: ${isRankItem}, isBattlepassItem: ${isBattlepassItem}, in cart: ${inCart}, quantity: ${inCart ? cartItem.quantity : 0}`);
 
                                                 if (inCart) {
                                                 try {
@@ -617,6 +618,12 @@ $spawners = $db->query("SELECT * FROM spawners")->fetchAll(PDO::FETCH_ASSOC);
                                 })
                                 .then(keysTotal => {
                                     totalPrice += keysTotal;
+
+                                    // Then process battlepasses
+                                    return processItemsFromUrl("battlepasses.php", false);
+                                })
+                                .then(battlepassesTotal => {
+                                    totalPrice += battlepassesTotal;
 
                                     // Then process ranks
                                     return processItemsFromUrl("ranks.php", false);

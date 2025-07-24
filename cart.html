@@ -755,260 +755,304 @@
                     // First fetch details from keys.php
                     fetchItemsFromSource("keys.php")
                         .then((keysItems) => {
-                            // Then fetch from shards.php
-                            fetchItemsFromSource("shards.php")
-                                .then((spawnerItems) => {
-                                    // Then fetch from ranks.php
-                                    fetchItemsFromSource("ranks.php")
-                                        .then((rankItems) => {
-                                            // Combine items from all sources
-                                            const allItems = [
-                                                ...keysItems,
-                                                ...spawnerItems,
-                                                ...rankItems,
-                                            ];
+                            // Then fetch from battlepasses.php
+                            fetchItemsFromSource("battlepasses.php")
+                                .then((battlepassItems) => {
+                                    // Then fetch from shards.php
+                                    fetchItemsFromSource("shards.php")
+                                        .then((spawnerItems) => {
+                                            // Then fetch from ranks.php
+                                            fetchItemsFromSource("ranks.php")
+                                                .then((rankItems) => {
+                                                    // Combine items from all sources
+                                                    const allItems = [
+                                                        ...keysItems,
+                                                        ...battlepassItems,
+                                                        ...spawnerItems,
+                                                        ...rankItems,
+                                                    ];
 
-                                            console.log("Processing items:", {
-                                                pendingItems: pendingItems,
-                                                allItemsCount: allItems.length,
-                                                allItemIds: allItems.map((el) =>
-                                                    el.getAttribute("data-id"),
-                                                ),
-                                            });
-
-                                            // Process each pending item
-                                            pendingItems.forEach((item) => {
-                                                let id = String(item.id);
-
-                                                console.log(
-                                                    `Looking for item with ID: ${id} (original: ${item.id}) in ${allItems.length} items`,
-                                                );
-
-                                                // First try exact match
-                                                let matchingItem =
-                                                    allItems.find(
-                                                        (el) =>
-                                                            el.getAttribute(
-                                                                "data-id",
-                                                            ) === id,
-                                                    );
-
-                                                // If no match found, try with/without quotes
-                                                if (!matchingItem) {
                                                     console.log(
-                                                        `No exact match for ID ${id}, trying alternative formats`,
+                                                        "Processing items:",
+                                                        {
+                                                            pendingItems:
+                                                                pendingItems,
+                                                            allItemsCount:
+                                                                allItems.length,
+                                                            allItemIds:
+                                                                allItems.map(
+                                                                    (el) =>
+                                                                        el.getAttribute(
+                                                                            "data-id",
+                                                                        ),
+                                                                ),
+                                                        },
                                                     );
-                                                    matchingItem =
-                                                        allItems.find((el) => {
-                                                            const elId =
-                                                                el.getAttribute(
+
+                                                    // Process each pending item
+                                                    pendingItems.forEach(
+                                                        (item) => {
+                                                            let id = String(
+                                                                item.id,
+                                                            );
+
+                                                            console.log(
+                                                                `Looking for item with ID: ${id} (original: ${item.id}) in ${allItems.length} items`,
+                                                            );
+
+                                                            // First try exact match
+                                                            let matchingItem =
+                                                                allItems.find(
+                                                                    (el) =>
+                                                                        el.getAttribute(
+                                                                            "data-id",
+                                                                        ) ===
+                                                                        id,
+                                                                );
+
+                                                            // If no match found, try with/without quotes
+                                                            if (!matchingItem) {
+                                                                console.log(
+                                                                    `No exact match for ID ${id}, trying alternative formats`,
+                                                                );
+                                                                matchingItem =
+                                                                    allItems.find(
+                                                                        (
+                                                                            el,
+                                                                        ) => {
+                                                                            const elId =
+                                                                                el.getAttribute(
+                                                                                    "data-id",
+                                                                                );
+                                                                            return (
+                                                                                elId ===
+                                                                                    `"${id}"` ||
+                                                                                elId ===
+                                                                                    `'${id}'` ||
+                                                                                id ===
+                                                                                    `"${elId}"` ||
+                                                                                id ===
+                                                                                    `'${elId}'` ||
+                                                                                elId ===
+                                                                                    id.replace(
+                                                                                        /['"]/g,
+                                                                                        "",
+                                                                                    )
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }
+
+                                                            if (matchingItem) {
+                                                                console.log(
+                                                                    `Found matching item for ID ${id}:`,
+                                                                    matchingItem.outerHTML,
+                                                                );
+
+                                                                // Create cart item
+                                                                const cartItem =
+                                                                    document.createElement(
+                                                                        "div",
+                                                                    );
+                                                                cartItem.className =
+                                                                    "cart-item";
+                                                                // Store the original ID (with possible rank_ prefix)
+                                                                cartItem.setAttribute(
                                                                     "data-id",
+                                                                    id,
                                                                 );
-                                                            return (
-                                                                elId ===
-                                                                    `"${id}"` ||
-                                                                elId ===
-                                                                    `'${id}'` ||
-                                                                id ===
-                                                                    `"${elId}"` ||
-                                                                id ===
-                                                                    `'${elId}'` ||
-                                                                elId ===
-                                                                    id.replace(
-                                                                        /['"]/g,
-                                                                        "",
-                                                                    )
-                                                            );
-                                                        });
-                                                }
-
-                                                if (matchingItem) {
-                                                    console.log(
-                                                        `Found matching item for ID ${id}:`,
-                                                        matchingItem.outerHTML,
-                                                    );
-
-                                                    // Create cart item
-                                                    const cartItem =
-                                                        document.createElement(
-                                                            "div",
-                                                        );
-                                                    cartItem.className =
-                                                        "cart-item";
-                                                    // Store the original ID (with possible rank_ prefix)
-                                                    cartItem.setAttribute(
-                                                        "data-id",
-                                                        id,
-                                                    );
-                                                    // Also store type for debugging
-                                                    if (item.type) {
-                                                        cartItem.setAttribute(
-                                                            "data-type",
-                                                            item.type,
-                                                        );
-                                                    }
-
-                                                    // Extract item details with safeguards
-                                                    const nameElement =
-                                                        matchingItem.querySelector(
-                                                            "h2",
-                                                        );
-                                                    const name =
-                                                        nameElement?.textContent?.trim() ||
-                                                        `Item ${id}`;
-
-                                                    console.log(
-                                                        `Extracted name: "${name}" from element:`,
-                                                        nameElement?.outerHTML,
-                                                    );
-
-                                                    // Get clean description without price
-                                                    const descElement =
-                                                        matchingItem.querySelector(
-                                                            "p",
-                                                        );
-                                                    let description =
-                                                        descElement?.textContent ||
-                                                        "";
-
-                                                    // Get image if available
-                                                    const imgElement =
-                                                        matchingItem.querySelector(
-                                                            "img",
-                                                        );
-                                                    const imgSrc =
-                                                        imgElement?.getAttribute(
-                                                            "src",
-                                                        ) || "images/image.png";
-
-                                                    console.log("Found item:", {
-                                                        id: id,
-                                                        name: name,
-                                                        hasImage: !!imgSrc,
-                                                        matchingItem:
-                                                            matchingItem.outerHTML,
-                                                    });
-
-                                                    // Check if the item has a discount
-                                                    let priceHtml = "";
-                                                    let price = item.price || 3;
-                                                    const priceContainer =
-                                                        matchingItem.querySelector(
-                                                            ".price-container",
-                                                        );
-
-                                                    if (priceContainer) {
-                                                        // Extract price from discounted or original price
-                                                        const discountedElement =
-                                                            priceContainer.querySelector(
-                                                                ".discounted-price",
-                                                            );
-                                                        const originalPriceElement =
-                                                            priceContainer.querySelector(
-                                                                ".original-price",
-                                                            );
-
-                                                        if (
-                                                            discountedElement &&
-                                                            originalPriceElement
-                                                        ) {
-                                                            // Item has discount - show both prices
-                                                            const discountedPriceMatch =
-                                                                discountedElement.textContent.match(
-                                                                    /(\d+(?:\.\d+)?)/,
-                                                                );
-                                                            const originalPriceMatch =
-                                                                originalPriceElement.textContent.match(
-                                                                    /(\d+(?:\.\d+)?)/,
-                                                                );
-
-                                                            if (
-                                                                discountedPriceMatch &&
-                                                                originalPriceMatch
-                                                            ) {
-                                                                const discountedPrice =
-                                                                    parseFloat(
-                                                                        discountedPriceMatch[1],
+                                                                // Also store type for debugging
+                                                                if (item.type) {
+                                                                    cartItem.setAttribute(
+                                                                        "data-type",
+                                                                        item.type,
                                                                     );
-                                                                const originalPrice =
-                                                                    parseFloat(
-                                                                        originalPriceMatch[1],
-                                                                    );
-                                                                price =
-                                                                    discountedPrice;
+                                                                }
 
-                                                                priceHtml = `<div class="price-container">
+                                                                // Extract item details with safeguards
+                                                                const nameElement =
+                                                                    matchingItem.querySelector(
+                                                                        "h2",
+                                                                    );
+                                                                const name =
+                                                                    nameElement?.textContent?.trim() ||
+                                                                    `Item ${id}`;
+
+                                                                console.log(
+                                                                    `Extracted name: "${name}" from element:`,
+                                                                    nameElement?.outerHTML,
+                                                                );
+
+                                                                // Get clean description without price
+                                                                const descElement =
+                                                                    matchingItem.querySelector(
+                                                                        "p",
+                                                                    );
+                                                                let description =
+                                                                    descElement?.textContent ||
+                                                                    "";
+
+                                                                // Get image if available
+                                                                const imgElement =
+                                                                    matchingItem.querySelector(
+                                                                        "img",
+                                                                    );
+                                                                const imgSrc =
+                                                                    imgElement?.getAttribute(
+                                                                        "src",
+                                                                    ) ||
+                                                                    "images/image.png";
+
+                                                                console.log(
+                                                                    "Found item:",
+                                                                    {
+                                                                        id: id,
+                                                                        name: name,
+                                                                        hasImage:
+                                                                            !!imgSrc,
+                                                                        matchingItem:
+                                                                            matchingItem.outerHTML,
+                                                                    },
+                                                                );
+
+                                                                // Check if the item has a discount
+                                                                let priceHtml =
+                                                                    "";
+                                                                let price =
+                                                                    item.price ||
+                                                                    3;
+                                                                const priceContainer =
+                                                                    matchingItem.querySelector(
+                                                                        ".price-container",
+                                                                    );
+
+                                                                if (
+                                                                    priceContainer
+                                                                ) {
+                                                                    // Extract price from discounted or original price
+                                                                    const discountedElement =
+                                                                        priceContainer.querySelector(
+                                                                            ".discounted-price",
+                                                                        );
+                                                                    const originalPriceElement =
+                                                                        priceContainer.querySelector(
+                                                                            ".original-price",
+                                                                        );
+
+                                                                    if (
+                                                                        discountedElement &&
+                                                                        originalPriceElement
+                                                                    ) {
+                                                                        // Item has discount - show both prices
+                                                                        const discountedPriceMatch =
+                                                                            discountedElement.textContent.match(
+                                                                                /(\d+(?:\.\d+)?)/,
+                                                                            );
+                                                                        const originalPriceMatch =
+                                                                            originalPriceElement.textContent.match(
+                                                                                /(\d+(?:\.\d+)?)/,
+                                                                            );
+
+                                                                        if (
+                                                                            discountedPriceMatch &&
+                                                                            originalPriceMatch
+                                                                        ) {
+                                                                            const discountedPrice =
+                                                                                parseFloat(
+                                                                                    discountedPriceMatch[1],
+                                                                                );
+                                                                            const originalPrice =
+                                                                                parseFloat(
+                                                                                    originalPriceMatch[1],
+                                                                                );
+                                                                            price =
+                                                                                discountedPrice;
+
+                                                                            priceHtml = `<div class="price-container">
                                                                     <p class="original-price" style="text-decoration: line-through;">€${originalPrice}</p>
                                                                     <p class="discounted-price">€${discountedPrice}</p>
                                                                 </div>`;
-                                                            } else {
-                                                                price =
-                                                                    parseFloat(
-                                                                        discountedPriceMatch[1],
-                                                                    ) || price;
-                                                                priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
-                                                            }
-                                                        } else if (
-                                                            discountedElement
-                                                        ) {
-                                                            // Only discounted price exists
-                                                            const priceMatch =
-                                                                discountedElement.textContent.match(
-                                                                    /(\d+(?:\.\d+)?)/,
-                                                                );
-                                                            if (priceMatch) {
-                                                                price =
-                                                                    parseFloat(
-                                                                        priceMatch[1],
-                                                                    );
-                                                            }
-                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
-                                                        } else if (
-                                                            originalPriceElement
-                                                        ) {
-                                                            // Only original price exists
-                                                            const priceMatch =
-                                                                originalPriceElement.textContent.match(
-                                                                    /(\d+(?:\.\d+)?)/,
-                                                                );
-                                                            if (priceMatch) {
-                                                                price =
-                                                                    parseFloat(
-                                                                        priceMatch[1],
-                                                                    );
-                                                            }
-                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
-                                                        } else {
-                                                            // No price elements found in container
-                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
-                                                        }
-                                                    } else {
-                                                        // Extract price from description if available
-                                                        if (description) {
-                                                            const priceMatch =
-                                                                description.match(
-                                                                    /(\d+(?:\.\d+)?)/,
-                                                                );
-                                                            if (priceMatch) {
-                                                                price =
-                                                                    parseFloat(
-                                                                        priceMatch[1],
-                                                                    );
-                                                            }
-                                                        }
+                                                                        } else {
+                                                                            price =
+                                                                                parseFloat(
+                                                                                    discountedPriceMatch[1],
+                                                                                ) ||
+                                                                                price;
+                                                                            priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                                        }
+                                                                    } else if (
+                                                                        discountedElement
+                                                                    ) {
+                                                                        // Only discounted price exists
+                                                                        const priceMatch =
+                                                                            discountedElement.textContent.match(
+                                                                                /(\d+(?:\.\d+)?)/,
+                                                                            );
+                                                                        if (
+                                                                            priceMatch
+                                                                        ) {
+                                                                            price =
+                                                                                parseFloat(
+                                                                                    priceMatch[1],
+                                                                                );
+                                                                        }
+                                                                        priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                                    } else if (
+                                                                        originalPriceElement
+                                                                    ) {
+                                                                        // Only original price exists
+                                                                        const priceMatch =
+                                                                            originalPriceElement.textContent.match(
+                                                                                /(\d+(?:\.\d+)?)/,
+                                                                            );
+                                                                        if (
+                                                                            priceMatch
+                                                                        ) {
+                                                                            price =
+                                                                                parseFloat(
+                                                                                    priceMatch[1],
+                                                                                );
+                                                                        }
+                                                                        priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                                    } else {
+                                                                        // No price elements found in container
+                                                                        priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                                    }
+                                                                } else {
+                                                                    // Extract price from description if available
+                                                                    if (
+                                                                        description
+                                                                    ) {
+                                                                        const priceMatch =
+                                                                            description.match(
+                                                                                /(\d+(?:\.\d+)?)/,
+                                                                            );
+                                                                        if (
+                                                                            priceMatch
+                                                                        ) {
+                                                                            price =
+                                                                                parseFloat(
+                                                                                    priceMatch[1],
+                                                                                );
+                                                                        }
+                                                                    }
 
-                                                        // Create simple price display with new format
-                                                        priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
-                                                    }
+                                                                    // Create simple price display with new format
+                                                                    priceHtml = `<div class="price-container"><p class="discounted-price">€${price}</p></div>`;
+                                                                }
 
-                                                    // Check if this is a rank item
-                                                    const isRankItem =
-                                                        id.startsWith("rank_");
+                                                                // Check if this is a rank item
+                                                                const isRankItem =
+                                                                    id.startsWith(
+                                                                        "rank_",
+                                                                    );
 
-                                                    // Build cart item HTML with image if available
-                                                    if (isRankItem) {
-                                                        // For rank items - no quantity controls
-                                                        cartItem.innerHTML = `
+                                                                // Build cart item HTML with image if available
+                                                                if (
+                                                                    isRankItem
+                                                                ) {
+                                                                    // For rank items - no quantity controls
+                                                                    cartItem.innerHTML = `
                                                  <img src="${imgSrc}" class="item-image" alt="image">
                                                  <div class="cart-details">
                                                      <div>
@@ -1023,9 +1067,9 @@
                                                     <button class="remove-btn danger" onclick="removeFromCart('${id}')">Remove</button>
                                                  </div>
                                             `;
-                                                    } else {
-                                                        // For other items - with quantity controls
-                                                        cartItem.innerHTML = `
+                                                                } else {
+                                                                    // For other items - with quantity controls
+                                                                    cartItem.innerHTML = `
                                                  <img src="${imgSrc}" class="item-image" alt="image">
                                                  <div class="cart-details">
                                                      <div>
@@ -1046,20 +1090,23 @@
                                                     <button class="update-btn" style="display: none;" onclick="updateCartItem('${id}')">Update Quantity</button>
                                                  </div>
                                             `;
-                                                    }
+                                                                }
 
-                                                    cartListElement.appendChild(
-                                                        cartItem,
+                                                                cartListElement.appendChild(
+                                                                    cartItem,
+                                                                );
+                                                            }
+                                                        },
                                                     );
-                                                }
-                                            });
 
-                                            // Show summary if we have items
-                                            cartSummaryElement.style.display =
-                                                "block";
+                                                    // Show summary if we have items
+                                                    cartSummaryElement.style.display =
+                                                        "block";
 
-                                            // Update cart total
-                                            updateCartTotal();
+                                                    // Update cart total
+                                                    updateCartTotal();
+                                                })
+                                                .catch(handleFetchError);
                                         })
                                         .catch(handleFetchError);
                                 })

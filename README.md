@@ -1,7 +1,6 @@
 # SentrySMP Server Documentation
 
 [![Server Status](https://img.shields.io/badge/Server-Online-brightgreen)](https://mc.sentrysmp.eu)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20+-blue)](https://minecraft.net)
 [![Website](https://img.shields.io/badge/Website-sentrysmp.eu-orange)](https://sentrysmp.eu)
 
 ## 📋 Table of Contents
@@ -199,6 +198,11 @@ Edit these files for server-specific configuration:
 - Special reward keys
 - Custom commands execution
 
+#### Battlepasses (`battlepasses.php`)
+- Seasonal battle passes
+- Progressive reward systems
+- Premium content access
+
 #### Ranks (`ranks.php`)
 - VIP memberships
 - Special permissions
@@ -232,6 +236,7 @@ sentrysmp/
 │   ├── index.php                 # Homepage with VIP cleanup
 │   ├── shards.php                # Shards shop
 │   ├── keys.php                  # Keys shop
+│   ├── battlepasses.php          # Battlepasses shop
 │   ├── ranks.php                 # Ranks shop
 │   ├── cart.html                 # Shopping cart
 │   ├── checkout.php              # Checkout page
@@ -264,6 +269,7 @@ sentrysmp/
 │   ├── paid-list.php             # Payment history
 │   ├── edit_shards.php           # Shard editor
 │   ├── edit_keys.php             # Key editor
+│   ├── edit_passes.php           # Battlepass editor
 │   └── edit_ranks.php            # Rank editor
 │
 ├── 📊 APIs & Services
@@ -274,6 +280,7 @@ sentrysmp/
 │
 ├── 🗄️ Database Files
 │   ├── blog.sqlite               # Shards database
+│   ├── battlepasses.sqlite       # Battlepasses database
 │   ├── keys.sqlite               # Keys database
 │   ├── ranks.sqlite              # Ranks database
 │   ├── vip.sqlite                # VIP users database
@@ -361,7 +368,21 @@ CREATE TABLE Keys (
     value TEXT NOT NULL,
     image TEXT,
     prikaz TEXT,
-    price INTEGER DEFAULT 3
+    price INTEGER DEFAULT 3,
+    sales INTEGER
+);
+```
+
+### Battlepasses Table (`battlepasses.sqlite`)
+```sql
+CREATE TABLE Battlepasses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    value TEXT NOT NULL,
+    image TEXT,
+    prikaz TEXT,
+    price INTEGER DEFAULT 5,
+    sales INTEGER
 );
 ```
 
@@ -567,6 +588,7 @@ if (!isset($_SESSION["logged_in"]) || $_SESSION["logged_in"] !== true) {
 #### Database Editors
 - **Shards**: Add/edit/delete shard
 - **Keys**: Manage treasure keys
+- **Battlepasses**: Manage battle passes
 - **Ranks**: Configure rank packages
 
 #### Command Executor
@@ -902,15 +924,21 @@ The cart system has been enhanced for better reliability and user experience:
 
 ### Current Implementation Status
 - **Shards System**: Fully integrated with `shards.php` endpoint for proper cart functionality
-- **Price Display**: Standardized format with proper discount visualization
+- **Keys System**: Complete integration with cart, checkout, and RCON command execution
+- **Battlepasses System**: Full implementation with `battlepasses.php`, admin editor, and payment processing
+- **Ranks System**: Integrated with VIP/Eternal detection and automatic permission management
+- **Price Display**: Standardized format with proper discount visualization across all shop categories
+- **Cart Integration**: All shop categories (shards, keys, battlepasses, ranks) properly integrated
 - **Error Recovery**: Robust error handling prevents payment processing interruptions
 - **Cross-browser Compatibility**: JavaScript improvements ensure consistent behavior
 
 ### File Structure Updates
 Key files have been updated to maintain system consistency:
-- Cart rendering logic (`cart.html`)
-- Payment processing (`execute_db_command.php`, `paypal-checkout.php`)
-- JavaScript handlers (`cart-processor.js`, `js/cart-handler.js`)
+- **Cart System**: Enhanced rendering logic (`cart.html`) with support for all shop categories
+- **Payment Processing**: Updated `execute_db_command.php` with battlepasses support and improved ID mapping
+- **Checkout Integration**: `checkout.php` processes all item types including battlepasses
+- **Admin Tools**: Complete editor suite (`edit_shards.php`, `edit_keys.php`, `edit_passes.php`, `edit_ranks.php`)
+- **Database Schema**: All shop categories have consistent table structures with price and sales support
 
 ## 📄 License
 

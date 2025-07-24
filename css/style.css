@@ -310,6 +310,7 @@ a:has(li) {
 }
 .item-red {
     background: linear-gradient(to right, red, orange);
+    font-size: 3rem;
 }
 .item-pink {
     background: linear-gradient(to right, #c200bf, #dba7da);
@@ -833,7 +834,6 @@ select {
     gap: 10px;
 }
 .skin-preview {
-    width: 40px;
     border-radius: 10px;
 }
 .switch {
@@ -1267,7 +1267,115 @@ body.dark .item-subtotal.discounted-price {
     justify-content: space-between;
 }
 
-/* Removed duplicate - unified with informational above */
+.section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #090909;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-items: center;
+}
+
+.team-item {
+    background: #dcdcdc;
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    border: 1px solid lightslategray;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 280px;
+}
+
+.team-item:hover {
+    transform: scale(1.05);
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.person {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Badge colors */
+.badge-owner {
+    background: #db3444;
+    color: white;
+}
+
+.badge-coowner {
+    background: #db4d34;
+    color: white;
+}
+
+.badge-leader {
+    background: #21dcb7;
+    color: white;
+}
+
+.badge-manager {
+    background: #33e8d8;
+    color: white;
+}
+
+.badge-dev {
+    background: purple;
+    color: white;
+}
+
+.badge-webdev {
+    background: rebeccapurple;
+    color: white;
+}
+
+.badge-mod-plus {
+    background: #12b4e8;
+    color: white;
+}
+
+.badge-mod {
+    background: #51d3fd;
+    color: white;
+}
+
+.badge-builder-plus {
+    background: #35d622;
+    color: white;
+}
+
+.badge-builder {
+    background: #5ce54c;
+    color: white;
+}
+.section {
+    margin-bottom: 60px;
+}
 
 /* Unified dark mode button styles */
 body.dark .update-btn,
