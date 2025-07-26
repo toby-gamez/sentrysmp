@@ -2,12 +2,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var navbar = document.getElementById("navbar-main");
   var navbarContent = `
       <div class="navbar-container">
-        <a href="/" class="logonav">
+        <a href="home" class="logonav">
           <img src="images/logo.png" class="logoimage" width="150px" alt="" />
         </a>
         <button class="toggle-btn" id="toggleBtn" style="text-align: center; margin-top: auto">&#9776;</button>
         <ul class="nav-links" id="navLinks">
-          <li><a href="/"><i class="bi bi-house"></i> Home</a></li>
+          <li><a href="home"><i class="bi bi-house"></i> Home</a></li>
           <li><a href="about.html"><i class="bi bi-info-circle"></i> About Server</a></li>
           <li><a href="our-team.php"><i class="bi bi-people"></i> Our Team</a></li>
           <li><a href="vote.html"><i class="bi bi-heart"></i> Vote For Us</a></li>
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <p class="footer-p">© 2025 Sentry SMP. All rights reserved.</p>
         <p class="mojang-notice">We are not affiliated with or endorsed by Mojang, AB.</p>
     </div>
-    <p class="web-version">2.5</p>
+    <p class="web-version">2.6</p>
   `;
   footer.innerHTML = footerContent;
 
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var headerContent = `
     <div class="header-background"></div>
     <div class="grid">
-        <a href="/"
+        <a href="home"
             ><div class="logo grid-item">
                 <img
                     src="images/logo.png"

@@ -21,7 +21,7 @@ file_put_contents(
         "\n" .
         "Raw input: " .
         file_get_contents("php://input") .
-        "\n"
+        "\n",
 );
 
 // Zkontrolujeme zdroj dat - zda používáme POST nebo GET
@@ -216,10 +216,10 @@ echo '
 
         // Redirect to index page after a short delay
         setTimeout(function() {
-            window.location.href = "/";
+            window.location.href = "home";
         }, 1500);
     </script>
-    <p>Logging in... If you are not redirected, <a href="/">click here</a>.</p>
+    <p>Logging in... If you are not redirected, <a href="home">click here</a>.</p>
 </body>
 </html>
 ';
