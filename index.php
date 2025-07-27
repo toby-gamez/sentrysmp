@@ -1589,7 +1589,7 @@
                             <span class="faq-toggle">▼</span>
                         </div>
                         <div class="faq-answer">
-                            Just open Minecraft Java or Bedrock edition. For Java, add a new server with the IP "mc.sentrysmp.eu" and join. The server supports version 1.21.4 and above. For Bedrock, add a new server with the IP "pe.sentrysmp.eu" and port "25565", then join. The server supports the latest Bedrock version.
+                            Just open Minecraft Java or Bedrock edition. For Java, add a new server with the IP "mc.sentrysmp.eu" and join. The server supports version 1.21.4 and above. For Bedrock, add a new server with the IP "pe.sentrysmp.eu" and port "25566", then join. The server supports the latest Bedrock version.
                         </div>
                     </div>
 
@@ -1739,9 +1739,9 @@
                                 <label class="info-label">Port</label>
                                 <div
                                     class="info-value"
-                                    onclick="copyToClipboard('25565')"
+                                    onclick="copyToClipboard('25566')"
                                 >
-                                    25565
+                                    25566
                                     <button class="copy-btn" title="Copy">
                                         <i class="bi bi-clipboard"></i>
                                     </button>
