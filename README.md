@@ -183,7 +183,7 @@ Edit these files for server-specific configuration:
 ### 👤 User Management
 - **Player Authentication**: Minecraft username-based login (Bedrock players have a dot before their name, e.g., `.BedrockPlayer`)
 - **Session Management**: Secure PHP sessions
-- **VIP System**: Automated 30-day VIP memberships
+- **VIP System**: Automated 30-day VIP and Eternal memberships
 - **Permission Management**: RCON-based rank assignment
 
 ### 🎯 Shop Categories

@@ -1288,10 +1288,173 @@
             hr {
                 color: white;
             }
+            .navbar {
+                background: rgba(0, 0, 0, 0.2);
+                padding: 0.75rem 1rem;
+                position: fixed; /* Tady přidáme */
+                top: 0; /* Zajistí, že navbar bude vždy nahoře */
+                z-index: 100; /* Aby byl nad ostatním obsahem */
+                width: 100%; /* Aby navbar zabíral celou šířku */
+                max-width: 1200px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 10px;
+                top: 10px;
+                backdrop-filter: blur(10px); /* rozmazání za prvkem */
+                -webkit-backdrop-filter: blur(10px);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar-container {
+                max-width: 1200px;
+                margin: auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            /* Logo a toggle na jednom řádku */
+            .logonav {
+                font-size: 2rem;
+                font-weight: bold;
+                text-decoration: none;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+
+            .toggle-btn {
+                display: none;
+                font-size: 1.5rem;
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: white;
+            }
+            .toggle-btn:hover {
+                background-color: #eeeeee;
+            }
+
+            .nav-links {
+                list-style: none;
+                display: flex;
+                gap: 1.5rem;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            .nav-links a {
+                text-decoration: none;
+                color: white;
+                transition: all ease 0.3s;
+            }
+
+            .dropdown {
+                position: relative;
+            }
+
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: 120%;
+                left: 0;
+                background: black;
+                border: 1px solid black;
+                min-width: 150px;
+                z-index: 100;
+                list-style: none;
+            }
+
+            .dropdown-menu li a {
+                display: block;
+                padding: 0.5rem 1rem;
+                color: #333;
+            }
+
+            .dropdown-menu li a:hover {
+                background: #f0f0f0;
+            }
+
+            /* Hover pro desktop */
+            @media (min-width: 769px) {
+                .dropdown:hover .dropdown-menu {
+                    display: block;
+                }
+            }
+
+            /* Mobilní verze */
+            /* Mobilní verze */
+            @media (max-width: 871px) {
+                .navbar {
+                    width: calc(100% - 10px);
+                    transform: translateX(0);
+                    left: 0;
+                    top: 5px;
+                    margin-left: 5px;
+                    margin-right: 5px;
+                }
+
+                .toggle-btn {
+                    display: block;
+                    color: black;
+                }
+
+                .nav-links {
+                    display: none;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    margin-top: 0.75rem;
+                    width: 100%;
+                }
+
+                .nav-links.active {
+                    display: flex;
+                }
+
+                .dropdown-menu {
+                    position: static;
+                    border: none;
+                    padding-left: 1rem;
+                }
+
+                .dropdown.open .dropdown-menu {
+                    display: block;
+                }
+
+                .dropdown-toggle::after {
+                    content: " ▼";
+                    font-size: 0.8rem;
+                }
+            }
+            #cookie-banner {
+                display: none;
+            }
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 40px;
+                height: 24px;
+            }
+            .switch,
+            .switch input {
+                display: none;
+            }
         </style>
     </head>
     <body>
         <!-- Hero Section -->
+        <nav class="navbar" id="navbar-main"><div class="navbar-container">
+          <a href="home" class="logonav">
+            <img src="images/logo.png" class="logoimage" width="150px" alt="" />
+          </a>
+          <button class="toggle-btn" id="toggleBtn" style="text-align: center; margin-top: auto">&#9776;</button>
+          <ul class="nav-links" id="navLinks">
+            <li><a href="home"><i class="bi bi-house"></i> Home</a></li>
+            <li><a href="about.html"><i class="bi bi-info-circle"></i> About Server</a></li>
+            <li><a href="our-team.php"><i class="bi bi-people"></i> Our Team</a></li>
+            <li><a href="vote.html"><i class="bi bi-heart"></i> Vote For Us</a></li>
+            <li><a href="login.php"><i class="bi bi-person"></i> Admin</a></li>
+          </ul>
+        </div></nav>
         <section class="hero" id="home">
             <div class="container">
                 <div class="hero-content">

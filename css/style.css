@@ -39,7 +39,7 @@ h2 {
 }
 
 .logo img {
-    width: 40rem;
+    width: 36rem;
 }
 /* This style is defined twice - unified here */
 .big {
@@ -170,7 +170,7 @@ button:disabled {
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 1rem;
     display: flex;
-    padding-top: 60px;
+    padding-top: 120px;
     padding-bottom: 41px;
     max-width: 1200px;
     align-items: center;
@@ -233,7 +233,7 @@ a:has(li) {
     }
     header {
         flex-direction: column;
-        height: 400px;
+        height: 440px;
         padding-bottom: 0;
         max-width: 1200px;
         align-items: center;
@@ -259,7 +259,7 @@ a:has(li) {
 .grid-div {
     margin-left: auto;
     margin-right: auto;
-    padding-top: 4rem;
+    padding-top: 7rem;
     padding-bottom: 3rem;
     max-width: 1000px;
 }
@@ -449,13 +449,20 @@ footer {
 }
 
 .navbar {
-    background: #f9f9f9;
-    border-bottom: 1px solid black;
+    background: rgba(255, 255, 255, 0.2);
     padding: 0.75rem 1rem;
-    position: sticky; /* Tady přidáme sticky */
+    position: fixed; /* Tady přidáme */
     top: 0; /* Zajistí, že navbar bude vždy nahoře */
     z-index: 100; /* Aby byl nad ostatním obsahem */
     width: 100%; /* Aby navbar zabíral celou šířku */
+    max-width: 1200px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    top: 10px;
+    backdrop-filter: blur(10px); /* rozmazání za prvkem */
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-container {
@@ -542,10 +549,12 @@ footer {
 /* Mobilní verze */
 @media (max-width: 871px) {
     .navbar {
-        position: sticky; /* Udržet navbar nahoře i na mobilu */
-        top: 0; /* Zajistí, že navbar bude vždy nahoře */
-        z-index: 100; /* Aby byl nad ostatním obsahem */
-        width: 100%; /* Zajišťuje, že navbar bude zabírat celou šířku */
+        width: calc(100% - 10px);
+        transform: translateX(0);
+        left: 0;
+        top: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
     }
 
     .toggle-btn {
@@ -884,7 +893,7 @@ input:checked + .slider:before {
 .header-background {
     position: absolute;
     width: 100%;
-    height: 250px;
+    height: 300px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 120% auto;
@@ -1538,7 +1547,7 @@ body.dark .vip-package .view-cart-link {
 
 @media (max-width: 1249px) {
     .header-background {
-        height: 400px;
+        height: 440px;
         background-size: cover;
     }
     .logo img {
@@ -1761,7 +1770,7 @@ body.dark .mojang-notice {
     color: #9e9e9e;
 }
 body.dark .navbar {
-    background: #090909;
+    background: rgba(0, 0, 0, 0.2);
 }
 body.dark .cart-item,
 body.dark .spawner {
@@ -1851,7 +1860,6 @@ body.dark .item-turquoise {
 }
 @media (max-width: 1249px) {
     body.dark .header-background {
-        height: 400px;
         background-size: cover;
     }
 }
