@@ -71,7 +71,11 @@ if ($edition === "java") {
     // For Bedrock and cracked accounts, use default Steve skin
     $skinUrl = "https://minotar.net/helm/MHF_Steve/100";
 }
-$finalUsername = $usernamemc;
+if ($edition === "bedrock") {
+    $finalUsername = "." . $usernamemc;
+} else {
+    $finalUsername = $usernamemc;
+}
 
 $_SESSION["usernamemc"] = $finalUsername;
 $_SESSION["edition"] = $edition;

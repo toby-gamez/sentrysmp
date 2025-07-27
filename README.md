@@ -181,7 +181,7 @@ Edit these files for server-specific configuration:
 - **Order Management**: Complete transaction tracking
 
 ### 👤 User Management
-- **Player Authentication**: Minecraft username-based login
+- **Player Authentication**: Minecraft username-based login (Bedrock players have a dot before their name, e.g., `.BedrockPlayer`)
 - **Session Management**: Secure PHP sessions
 - **VIP System**: Automated 30-day VIP memberships
 - **Permission Management**: RCON-based rank assignment
