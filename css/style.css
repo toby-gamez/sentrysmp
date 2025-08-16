@@ -360,7 +360,7 @@ a:has(li) {
         height: 200px;
     }
     .item-red {
-        font-size: 3.5rem;
+        line-height: 1;
     }
 }
 .thing-grid-item.disabled:hover {
