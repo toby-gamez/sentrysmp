@@ -123,7 +123,6 @@ hr {
 input,
 textarea {
     background-color: #dcdcdc;
-    border: none;
     color: black;
     border-radius: 10px;
     width: 100%;
@@ -333,9 +332,6 @@ a:has(li) {
 }
 /*      background: linear-gradient(to right, red, orange);*/
 @media (max-width: 1019px) {
-    .thing-div {
-        padding: auto;
-    }
     .thing-grid {
         max-width: 400px;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -351,9 +347,6 @@ a:has(li) {
         padding-left: 15px;
         padding-right: 15px;
     }
-    .thing-div {
-        padding: auto;
-    }
     .thing-grid {
         max-width: 350px;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -366,6 +359,9 @@ a:has(li) {
         margin-right: calc((100vw - 350px) / 2);
         height: 200px;
     }
+    .item-red {
+        font-size: 3.5rem;
+    }
 }
 .thing-grid-item.disabled:hover {
     transform: scale(1);
@@ -374,8 +370,6 @@ footer {
     z-index: 5;
     left: 0;
     width: 100%;
-    background-color: #f9f9f9;
-    padding: 20px;
     margin-top: 40px;
     border-top: 1px solid #ddd;
     background: #e2e2e2;
@@ -452,7 +446,6 @@ footer {
     background: rgba(255, 255, 255, 0.2);
     padding: 0.75rem 1rem;
     position: fixed; /* Tady přidáme */
-    top: 0; /* Zajistí, že navbar bude vždy nahoře */
     z-index: 100; /* Aby byl nad ostatním obsahem */
     width: 100%; /* Aby navbar zabíral celou šířku */
     max-width: 1200px;
@@ -501,15 +494,19 @@ footer {
     align-items: center;
     justify-content: flex-end;
 }
+.nav-links li {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+
+  .nav-links li:hover {
+    border-bottom: 2px solid black;
+  }
 
 .nav-links a {
     text-decoration: none;
     color: black;
     transition: all ease 0.3s;
-}
-
-.nav-links a:hover {
-    color: #3d3d3d;
 }
 
 .dropdown {
@@ -650,6 +647,7 @@ footer {
     align-items: center;
     z-index: 9999;
     font-size: 14px;
+    border-top: 1px solid black;
 }
 .accept {
     background-color: #2ecc71;
@@ -686,7 +684,6 @@ footer {
     box-shadow:
         2px 2px 0 #25f4ee,
         -2px -2px 0 #fe2c55;
-    transition: transform 0.2s all;
 }
 .tiktok-button:hover {
     transform: scale(1.05);
@@ -1023,7 +1020,6 @@ body.dark .quantity-controls span {
     border: none;
     width: 25px;
     height: 25px;
-    font-size: 16px;
     cursor: pointer;
     margin: 0 5px;
     color: #333;
@@ -1164,7 +1160,6 @@ input.item-quantity::-webkit-inner-spin-button {
     border: none;
     width: 25px;
     height: 25px;
-    font-size: 16px;
     cursor: pointer;
     margin: 0 5px;
     color: #333;
@@ -1783,6 +1778,7 @@ body.dark .special-cart {
 body.dark #cookie-banner {
     background: #242424;
     color: white;
+    border-top: 1px solid white;
 }
 body.dark #cookie-banner .accept {
     background: #2ecc71;
@@ -1828,6 +1824,9 @@ body.dark .footer-p {
 body.dark .nav-links a {
     color: white;
 }
+body.dark .nav-links li:hover {
+    border-bottom: 2px solid white;
+  }
 body.dark .item-gold {
     background: linear-gradient(to right, orange, yellow);
 }

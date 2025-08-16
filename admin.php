@@ -17,7 +17,7 @@ $username = htmlspecialchars($_SESSION["username"]);
 ?>
 
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <!-- Google Consent Mode -->
         <script>
@@ -151,7 +151,9 @@ $username = htmlspecialchars($_SESSION["username"]);
                     -1px 1px 0 white,
                     1px 1px 0 white;
             }
-
+            .container {
+                max-width: none;
+            }
         </style>
     </head>
     <body>
@@ -255,6 +257,7 @@ $username = htmlspecialchars($_SESSION["username"]);
             <?php endif; ?>
         </script>
         <nav class="navbar" id="navbar-main"></nav>
+        <div class="container">
         <div class="main-wrapper">
             <h1 class="main">Admin Panel</h1>
         </div>
@@ -284,6 +287,7 @@ $username = htmlspecialchars($_SESSION["username"]);
                     </li></a
                 >
             </ul>
+        </div>
         </div>
         <footer id="footer-main"></footer>
         <script src="js/script.js"></script>
