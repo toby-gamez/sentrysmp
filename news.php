@@ -432,7 +432,7 @@ $announcements = getDiscordAnnouncements();
 
                         item.innerHTML = `
                             <div class="info"><h3>${blog.title}</h3>
-                            <small>Autor: ${blog.author} | ${localDate.toLocaleString()}</small></div>
+                            <small>Author: ${blog.author} | ${localDate.toLocaleString()}</small></div>
                             <div>${marked.parse(blog.content)}</div>
                         `;
                         list.appendChild(item);

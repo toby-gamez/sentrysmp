@@ -791,13 +791,13 @@ if (count($announcements) > 0) {
                         console.error('marked.js is not loaded!');
                         item.innerHTML = `
                             <div class="info"><h3>${blog.title}</h3>
-                            <small>Autor: ${blog.author} | ${localDate.toLocaleString()}</small></div>
+                            <small>Author: ${blog.author} | ${localDate.toLocaleString()}</small></div>
                             <div>${blog.content}</div>
                         `;
                     } else {
                         item.innerHTML = `
                             <div class="info"><h3>${blog.title}</h3>
-                            <small>Autor: ${blog.author} | ${localDate.toLocaleString()}</small></div>
+                            <small>Author: ${blog.author} | ${localDate.toLocaleString()}</small></div>
                             <div>${marked.parse(blog.content)}</div>
                         `;
                     }
