@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <p class="footer-p">© 2025 Sentry SMP. All rights reserved.</p>
         <p class="mojang-notice">We are not affiliated with or endorsed by Mojang, AB.</p>
     </div>
-    <p class="web-version">2.6.6</p>
+    <p class="web-version">2.6.7</p>
     <div id="cookie-banner">
           <span>We use cookies to analyze traffic and improve your experience. By continuing to browse, you agree to our use of cookies. <a href="privacy-policy.html">Learn more</a></span>
           <div>
