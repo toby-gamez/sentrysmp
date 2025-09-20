@@ -148,10 +148,10 @@ document.addEventListener("DOMContentLoaded", function () {
           <span>We use cookies to analyze traffic and improve your experience. By continuing to browse, you agree to our use of cookies. <a href="privacy-policy.html">Learn more</a></span>
           <div>
               <button class="accept" onclick="acceptCookies()">
-                  Přijmout
+              Acccept
               </button>
               <button class="decline" onclick="declineCookies()">
-                  Odmítnout
+              Decline
               </button>
           </div>
       </div>
